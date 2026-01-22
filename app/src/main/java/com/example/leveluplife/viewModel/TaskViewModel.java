@@ -38,4 +38,12 @@ public class TaskViewModel extends AndroidViewModel {
     public void deleteTask(Task task) {
         repository.deleteTask(task);
     }
+
+    public void toggleTaskCompleted(long taskId, boolean completed) {
+        Task task = new Task();
+        task.setId(taskId);
+        task.setCompleted(completed);
+        repository.updateTask(task);
+    }
+
 }
