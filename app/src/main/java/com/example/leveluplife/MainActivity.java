@@ -20,12 +20,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new TaskAdapter();
+        adapter.setOnTaskCheckedChangeListener((task, isChecked) -> {
+            taskViewModel.toggleTaskCompleted(task.getId(), isChecked);
+        });
         recyclerView.setAdapter(adapter);
 
         taskViewModel.getAllTasks().observe(this, tasks -> {
@@ -40,11 +42,11 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fabAddTask);
         fab.setOnClickListener(v -> {
             Task newTask = new Task(
-                    "FAB: " + System.currentTimeMillis(),
+                    "Новая задача XP:" + (50 + (int)(Math.random() * 50)),
                     Task.TaskType.DAILY,
                     Task.AttributeType.STRENGTH,
-                    50 + (int)(Math.random() * 50),
-                    5
+                    50 + (int)(Math.random() * 50),  // XP
+                    5                                // Gold
             );
             taskViewModel.insertTask(newTask);
         });
