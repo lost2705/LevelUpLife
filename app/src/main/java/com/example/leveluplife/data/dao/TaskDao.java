@@ -24,7 +24,7 @@ public interface TaskDao {
     List<Task> getAllTasks();
 
     @Query("SELECT * FROM tasks WHERE id = :taskId")
-    Task getTaskById(long taskId);  // ← ДОБАВЬ ЭТУ СТРОКУ!
+    Task getTaskById(long taskId);
 
     @Query("SELECT COALESCE(SUM(xp_reward), 0) FROM tasks WHERE completed = 1")
     LiveData<Integer> getTotalXp();
@@ -34,6 +34,9 @@ public interface TaskDao {
 
     @Query("SELECT COUNT(*) FROM tasks WHERE completed = 0")
     LiveData<Integer> getPendingTasksCount();
+
+    @Query("SELECT COALESCE(SUM(gold_reward), 0) FROM tasks WHERE completed = 1")
+    LiveData<Integer> getTotalGold();
 
     @Insert
     void insertTask(Task task);
