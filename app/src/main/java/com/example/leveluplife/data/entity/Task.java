@@ -3,7 +3,6 @@ package com.example.leveluplife.data.entity;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.ColumnInfo;
-import java.time.LocalDateTime;
 
 @Entity(tableName = "tasks")
 public class Task {

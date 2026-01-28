@@ -23,6 +23,18 @@ public interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY id DESC")
     List<Task> getAllTasks();
 
+    @Query("SELECT * FROM tasks WHERE id = :taskId")
+    Task getTaskById(long taskId);  // ← ДОБАВЬ ЭТУ СТРОКУ!
+
+    @Query("SELECT COALESCE(SUM(xp_reward), 0) FROM tasks WHERE completed = 1")
+    LiveData<Integer> getTotalXp();
+
+    @Query("SELECT COUNT(*) FROM tasks WHERE completed = 1")
+    LiveData<Integer> getCompletedTasksCount();
+
+    @Query("SELECT COUNT(*) FROM tasks WHERE completed = 0")
+    LiveData<Integer> getPendingTasksCount();
+
     @Insert
     void insertTask(Task task);
 
@@ -35,3 +47,4 @@ public interface TaskDao {
     @Query("DELETE FROM tasks")
     void deleteAll();
 }
+

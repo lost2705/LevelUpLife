@@ -40,4 +40,20 @@ public class TaskRepository {
     public void deleteTask(final Task task) {
         executor.execute(() -> taskDao.deleteTask(task));
     }
+
+    public LiveData<Integer> getTotalXp() {
+        return taskDao.getTotalXp();
+    }
+
+    public LiveData<Integer> getCompletedTasksCount() {
+        return taskDao.getCompletedTasksCount();
+    }
+
+    public LiveData<Integer> getPendingTasksCount() {
+        return taskDao.getPendingTasksCount();
+    }
+
+    public Task getTaskById(long taskId) {
+        return taskDao.getTaskById(taskId);
+    }
 }
