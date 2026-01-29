@@ -32,6 +32,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         notifyDataSetChanged();
     }
 
+    public Task getTaskAt(int position) {
+        if (tasks != null && position >= 0 && position < tasks.size()) {
+            return tasks.get(position);
+        }
+        return null;
+    }
+
     @NonNull
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -55,7 +62,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
         });
     }
-
 
     @Override
     public int getItemCount() {
