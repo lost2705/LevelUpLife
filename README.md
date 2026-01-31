@@ -37,3 +37,29 @@ Plans after MVP
  Multiplayer guilds/leaderboards
 
  iOS port (KMM or Swift rewrite)
+
+ 📱 Features (v0.1.0 MVP)
+Task Management
+CRUD Operations: Create, Read, Update, and Delete tasks seamlessly
+
+Task Completion: CheckBox toggle with instant LiveData updates
+
+Swipe to Delete: Swipe right to remove tasks with Snackbar UNDO action
+
+Long Press to Edit: Intuitive gesture to modify existing tasks
+
+Progression System
+XP Tracking: Displays total experience points earned from completed tasks
+
+Player Stats Header: Shows Total XP and completion counter (Completed X/Y)
+
+Rewards: Each task grants XP (1-999 range) and gold
+
+UI/UX
+Material Design: Modern interface with dialogs, FAB, TextInputLayout, and Snackbar
+
+Task Creation Dialog: Input validation (default title "New Task", XP clamped to 1-999)
+
+Task Edit Dialog: Pre-filled fields for seamless editing
+
+Color Scheme: Purple accent (#BB86FC) for gamification elements
