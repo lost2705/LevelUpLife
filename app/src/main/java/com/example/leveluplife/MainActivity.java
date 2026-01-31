@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.example.leveluplife.data.entity.Task;
 import com.example.leveluplife.ui.dialogs.TaskCreationDialog;
+import com.example.leveluplife.ui.dialogs.TaskEditDialog;
 import com.example.leveluplife.ui.tasks.TaskAdapter;
 import com.example.leveluplife.viewModel.TaskViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -69,6 +70,15 @@ public class MainActivity extends AppCompatActivity {
         // Setup adapter listener
         adapter.setOnTaskCheckedChangeListener((task, isChecked) -> {
             taskViewModel.toggleTaskCompleted(task.getId(), isChecked);
+        });
+
+        adapter.setOnTaskLongClickListener(task -> {
+            TaskEditDialog dialog = new TaskEditDialog();
+            dialog.setTask(task);
+            dialog.setOnTaskEditedListener(editedTask -> {
+                taskViewModel.updateTask(editedTask);
+            });
+            dialog.show(getSupportFragmentManager(), "TaskEditDialog");
         });
 
         fabAddTask.setOnClickListener(v -> {
