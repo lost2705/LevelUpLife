@@ -61,6 +61,25 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 listener.onTaskCheckedChanged(task, isChecked);
             }
         });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) {
+                longClickListener.onTaskLongClick(task);
+                return true;
+            }
+            return false;
+        });
+    }
+
+
+    public interface OnTaskLongClickListener {
+        void onTaskLongClick(Task task);
+    }
+
+    private OnTaskLongClickListener longClickListener;
+
+    public void setOnTaskLongClickListener(OnTaskLongClickListener listener) {
+        this.longClickListener = listener;
     }
 
     @Override
