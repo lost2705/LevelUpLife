@@ -2,8 +2,11 @@ package com.example.leveluplife.data.repository;
 
 import android.app.Application;
 import androidx.lifecycle.LiveData;
+
+import com.example.leveluplife.data.dao.PlayerDao;
 import com.example.leveluplife.data.dao.TaskDao;
 import com.example.leveluplife.data.database.AppDatabase;
+import com.example.leveluplife.data.entity.Player;
 import com.example.leveluplife.data.entity.Task;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -14,8 +17,10 @@ public class TaskRepository {
     private TaskDao taskDao;
     private LiveData<List<Task>> allTasks;
     private ExecutorService executor = Executors.newFixedThreadPool(4);
+    private Application application;
 
     public TaskRepository(Application application) {
+        this.application = application;
         AppDatabase database = AppDatabase.getDatabase(application);
         taskDao = database.taskDao();
         allTasks = taskDao.getAllTasksLiveData();
@@ -38,7 +43,22 @@ public class TaskRepository {
     }
 
     public void deleteTask(final Task task) {
-        executor.execute(() -> taskDao.deleteTask(task));
+        executor.execute(() -> {
+            if (task.isCompleted()) {
+                AppDatabase db = AppDatabase.getDatabase(application);
+                PlayerDao playerDao = db.playerDao();
+                Player player = playerDao.getPlayerSync();
+
+                if (player != null) {
+                    player.currentXp = Math.max(0, player.currentXp - task.getXpReward());
+                    player.gold = Math.max(0, player.gold - task.getGoldReward());
+                    player.lastUpdated = System.currentTimeMillis();
+                    playerDao.updatePlayer(player);
+                }
+            }
+
+            taskDao.deleteTask(task);
+        });
     }
 
     public LiveData<Integer> getTotalXp() {
@@ -55,5 +75,38 @@ public class TaskRepository {
 
     public Task getTaskById(long taskId) {
         return taskDao.getTaskById(taskId);
+    }
+
+    public void toggleTaskCompletedWithRewards(long taskId, boolean isCompleted, Application application) {
+        executor.execute(() -> {
+            Task task = taskDao.getTaskById(taskId);
+            if (task == null) return;
+
+            boolean wasCompleted = task.isCompleted();
+
+            if (wasCompleted == isCompleted) {
+                return;
+            }
+
+            task.setCompleted(isCompleted);
+            taskDao.updateTask(task);
+
+            AppDatabase db = AppDatabase.getDatabase(application);
+            PlayerDao playerDao = db.playerDao();
+            Player player = playerDao.getPlayerSync();
+
+            if (player != null) {
+                if (isCompleted && !wasCompleted) {
+                    player.addXp(task.getXpReward());
+                    player.gold += task.getGoldReward();
+                } else if (!isCompleted && wasCompleted) {
+                    player.currentXp = Math.max(0, player.currentXp - task.getXpReward());
+                    player.gold = Math.max(0, player.gold - task.getGoldReward());
+                }
+
+                player.lastUpdated = System.currentTimeMillis();
+                playerDao.updatePlayer(player);
+            }
+        });
     }
 }

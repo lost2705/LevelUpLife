@@ -1,6 +1,7 @@
 package com.example.leveluplife;
 
 import android.os.Bundle;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.leveluplife.data.entity.Player;
 import com.example.leveluplife.data.entity.Task;
 import com.example.leveluplife.ui.dialogs.TaskCreationDialog;
 import com.example.leveluplife.ui.tasks.TaskAdapter;
@@ -21,7 +23,7 @@ import com.google.android.material.snackbar.Snackbar;
 public class MainActivity extends AppCompatActivity {
 
     private TaskViewModel taskViewModel;
-    private PlayerViewModel playerViewModel;  // 🆕
+    private PlayerViewModel playerViewModel;
     private TaskAdapter adapter;
 
     @Override
@@ -29,48 +31,37 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // === VIEWMODEL INITIALIZATION ===
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
-        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);  // 🆕
+        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
 
-        playerViewModel.initializePlayerIfNeeded();  // 🆕
+        playerViewModel.initializePlayerIfNeeded();
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         adapter = new TaskAdapter();
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // === OBSERVERS ===
 
+        // Tasks observer
         taskViewModel.getAllTasks().observe(this, tasks -> {
             adapter.setTasks(tasks);
         });
 
-        taskViewModel.getTotalXp().observe(this, totalXp -> {
-            TextView totalXpText = findViewById(R.id.totalXpText);
-            if (totalXpText != null && totalXp != null) {
-                totalXpText.setText("Total XP: " + totalXp);
-            }
-        });
-
-        taskViewModel.getCompletedTasksCount().observe(this, completed -> {
-            taskViewModel.getAllTasks().observe(this, tasks -> {
-                TextView completedTasksText = findViewById(R.id.completedTasksText);
-                if (completedTasksText != null && completed != null && tasks != null) {
-                    completedTasksText.setText("Completed: " + completed + "/" + tasks.size());
-                }
-            });
-        });
-
+        // Player observer (обновление UI)
         playerViewModel.getPlayer().observe(this, player -> {
             if (player != null) {
-                android.util.Log.d("MainActivity", "Player loaded: Level " + player.level +
-                        ", Gold: " + player.gold + ", XP: " + player.currentXp);
+                updatePlayerUI(player);
             }
         });
 
+        // === TASK COMPLETION TOGGLE ===
         adapter.setOnTaskCheckedChangeListener((task, isChecked) -> {
             taskViewModel.toggleTaskCompleted(task.getId(), isChecked);
         });
 
+        // === FAB (CREATE TASK) ===
         FloatingActionButton fabAddTask = findViewById(R.id.fabAddTask);
         fabAddTask.setOnClickListener(v -> {
             TaskCreationDialog dialog = new TaskCreationDialog();
@@ -80,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
             dialog.show(getSupportFragmentManager(), "TaskCreationDialog");
         });
 
+        // === SWIPE TO DELETE ===
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
 
@@ -100,10 +92,61 @@ public class MainActivity extends AppCompatActivity {
                         Snackbar.make(recyclerView, "Task deleted", Snackbar.LENGTH_LONG)
                                 .setAction("UNDO", v -> {
                                     taskViewModel.insertTask(deletedTask);
+
+                                    if (deletedTask.isCompleted()) {
+                                        playerViewModel.addXp(deletedTask.getXpReward());
+                                        playerViewModel.addGold(deletedTask.getGoldReward());
+                                    }
                                 }).show();
+
                     }
                 }
         );
         itemTouchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    private void updatePlayerUI(Player player) {
+        // Level
+        TextView playerLevelText = findViewById(R.id.playerLevelText);
+        if (playerLevelText != null) {
+            playerLevelText.setText("Level " + player.level);
+        }
+
+        // XP Progress Bar
+        ProgressBar xpProgressBar = findViewById(R.id.xpProgressBar);
+        if (xpProgressBar != null) {
+            xpProgressBar.setMax((int) player.xpToNextLevel);
+            xpProgressBar.setProgress((int) player.currentXp);
+        }
+
+        // XP Text
+        TextView xpText = findViewById(R.id.xpText);
+        if (xpText != null) {
+            xpText.setText(player.currentXp + "/" + player.xpToNextLevel);
+        }
+
+        // Gold
+        TextView goldText = findViewById(R.id.goldText);
+        if (goldText != null) {
+            goldText.setText("💰 Gold: " + player.gold);
+        }
+
+        // Gems
+        TextView gemsText = findViewById(R.id.gemsText);
+        if (gemsText != null) {
+            gemsText.setText("💎 Gems: " + player.gems);
+        }
+
+        // HP
+        TextView hpText = findViewById(R.id.hpText);
+        if (hpText != null) {
+            hpText.setText("❤️ HP: " + player.currentHp + "/" + player.maxHp);
+        }
+
+        // Mana
+        TextView manaText = findViewById(R.id.manaText);
+        if (manaText != null) {
+            manaText.setText("💙 Mana: " + player.currentMana + "/" + player.maxMana);
+        }
     }
 }

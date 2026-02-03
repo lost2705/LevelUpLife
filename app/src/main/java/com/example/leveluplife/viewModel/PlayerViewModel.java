@@ -43,4 +43,13 @@ public class PlayerViewModel extends AndroidViewModel {
     public void initializePlayerIfNeeded() {
         repository.initializePlayerIfNeeded();
     }
+
+    public void subtractXp(long xp) {
+        repository.subtractXp(xp);
+    }
+
+    public void subtractGold(int amount) {
+        repository.subtractGold(amount);
+    }
+
 }
