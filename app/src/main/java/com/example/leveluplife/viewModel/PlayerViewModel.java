@@ -7,21 +7,21 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import com.example.leveluplife.data.entity.Player;
+import com.example.leveluplife.data.model.LevelUpEvent;
 import com.example.leveluplife.data.repository.PlayerRepository;
 
 public class PlayerViewModel extends AndroidViewModel {
 
     private final PlayerRepository repository;
-    private final LiveData<Player> player;
 
     public PlayerViewModel(@NonNull Application application) {
         super(application);
-        repository = new PlayerRepository(application);
-        player = repository.getPlayer();
+        repository = PlayerRepository.getInstance(application);  // ✅ Используем singleton
     }
 
+
     public LiveData<Player> getPlayer() {
-        return player;
+        return repository.getPlayer();  // ✅ Возвращаем напрямую из repository
     }
 
     public void updatePlayer(Player player) {
@@ -52,4 +52,7 @@ public class PlayerViewModel extends AndroidViewModel {
         repository.subtractGold(amount);
     }
 
+    public LiveData<LevelUpEvent> getLevelUpEvent() {
+        return repository.getLevelUpEvent();
+    }
 }

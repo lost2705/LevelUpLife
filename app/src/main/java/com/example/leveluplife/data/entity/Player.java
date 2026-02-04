@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.example.leveluplife.data.model.LevelUpEvent;
+
 @Entity(tableName = "player")
 public class Player {
 
@@ -94,21 +96,48 @@ public class Player {
         return 50 + (this.intelligence * 3);
     }
 
-    public boolean addXp(long xp) {
+    /**
+     * Добавить XP и проверить level-up
+     * @return LevelUpEvent если был level-up, null если не было
+     */
+    public LevelUpEvent addXp(long xp) {
         this.currentXp += xp;
 
-        boolean leveledUp = false;
+        LevelUpEvent levelUpEvent = null;
 
+        // Сохраняем старые значения для расчета прироста
+        int oldMaxHp = this.maxHp;
+        int oldMaxMana = this.maxMana;
+        int talentPointsGained = 0;
+
+        // Проверка на level-up (может быть несколько за раз)
         while (this.currentXp >= this.xpToNextLevel && this.level < 100) {
             this.currentXp -= this.xpToNextLevel;
             this.level++;
             this.xpToNextLevel = calculateXpForLevel(this.level + 1);
 
+            // +1 talent point за каждый уровень
             this.availableTalentPoints++;
-
-            leveledUp = true;
+            talentPointsGained++;
         }
 
+        // Если был level-up
+        if (talentPointsGained > 0) {
+            // Пересчитываем HP/Mana
+            recalculateStats();
+
+            // Создаем событие level-up
+            levelUpEvent = new LevelUpEvent(
+                    this.level,
+                    talentPointsGained,
+                    oldMaxHp,
+                    this.maxHp,
+                    oldMaxMana,
+                    this.maxMana
+            );
+        }
+
+        // Кап на уровне 100
         if (this.level >= 100) {
             this.level = 100;
             this.currentXp = 0;
@@ -116,8 +145,9 @@ public class Player {
         }
 
         this.lastUpdated = System.currentTimeMillis();
-        return leveledUp;
+        return levelUpEvent;
     }
+
 
     public void recalculateStats() {
         int oldMaxHp = this.maxHp;

@@ -1,10 +1,14 @@
 package com.example.leveluplife;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -13,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.leveluplife.data.entity.Player;
 import com.example.leveluplife.data.entity.Task;
+import com.example.leveluplife.data.model.LevelUpEvent;
 import com.example.leveluplife.ui.dialogs.TaskCreationDialog;
 import com.example.leveluplife.ui.tasks.TaskAdapter;
 import com.example.leveluplife.viewModel.PlayerViewModel;
@@ -22,6 +27,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
     private TaskViewModel taskViewModel;
     private PlayerViewModel playerViewModel;
     private TaskAdapter adapter;
@@ -35,8 +41,10 @@ public class MainActivity extends AppCompatActivity {
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
 
+        // Создаем игрока при первом запуске
         playerViewModel.initializePlayerIfNeeded();
 
+        // === RECYCLERVIEW SETUP ===
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         adapter = new TaskAdapter();
         recyclerView.setAdapter(adapter);
@@ -53,6 +61,13 @@ public class MainActivity extends AppCompatActivity {
         playerViewModel.getPlayer().observe(this, player -> {
             if (player != null) {
                 updatePlayerUI(player);
+            }
+        });
+
+        // Level-Up Observer
+        playerViewModel.getLevelUpEvent().observe(this, event -> {
+            if (event != null) {
+                showLevelUpDialog(event);
             }
         });
 
@@ -93,18 +108,21 @@ public class MainActivity extends AppCompatActivity {
                                 .setAction("UNDO", v -> {
                                     taskViewModel.insertTask(deletedTask);
 
+                                    // Если задача была выполнена — возвращаем награды
                                     if (deletedTask.isCompleted()) {
                                         playerViewModel.addXp(deletedTask.getXpReward());
                                         playerViewModel.addGold(deletedTask.getGoldReward());
                                     }
                                 }).show();
-
                     }
                 }
         );
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
+    /**
+     * Обновление Player UI в header
+     */
     private void updatePlayerUI(Player player) {
         // Level
         TextView playerLevelText = findViewById(R.id.playerLevelText);
@@ -148,5 +166,45 @@ public class MainActivity extends AppCompatActivity {
         if (manaText != null) {
             manaText.setText("💙 Mana: " + player.currentMana + "/" + player.maxMana);
         }
+    }
+
+    /**
+     * Показать Level-Up Dialog
+     */
+    private void showLevelUpDialog(LevelUpEvent event) {
+        Log.d(TAG, "showLevelUpDialog called! Creating dialog for Level " + event.newLevel);
+
+        // ✅ ИСПРАВЛЕНО: используем правильные поля и методы
+        int level = event.newLevel;
+        int talentPoints = event.talentPoints;
+        int hpGained = event.getHpGain();
+        int manaGained = event.getManaGain();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_level_up, null);
+
+        TextView tvLevelUp = dialogView.findViewById(R.id.tv_level_up);
+        TextView tvLevelNumber = dialogView.findViewById(R.id.tv_level_number);
+        TextView tvTalentPoints = dialogView.findViewById(R.id.tv_talent_points);
+        TextView tvMaxHp = dialogView.findViewById(R.id.tv_max_hp);
+        TextView tvMaxMana = dialogView.findViewById(R.id.tv_max_mana);
+        Button btnAwesome = dialogView.findViewById(R.id.btn_awesome);
+
+        tvLevelUp.setText("🎉 LEVEL UP! 🎉");
+        tvLevelNumber.setText("You reached Level " + level + "!");
+        tvTalentPoints.setText("⭐ +" + talentPoints + " Talent Point" + (talentPoints > 1 ? "s" : ""));
+        tvMaxHp.setText("❤️ Max HP +" + hpGained);
+        tvMaxMana.setText("💙 Max Mana +" + manaGained);
+
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        btnAwesome.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 }

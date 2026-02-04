@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="#1E1E1E">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tv_level_up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🎉 LEVEL UP! 🎉"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#FFD700"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Level -->
+    <TextView
+        android:id="@+id/tv_level_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You reached Level 5!"
+        android:textSize="20sp"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Rewards Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#2D2D2D"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:id="@+id/tv_talent_points"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⭐ +1 Talent Point"
+            android:textSize="16sp"
+            android:textColor="#FFD700"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_max_hp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="❤️ Max HP +25"
+            android:textSize="16sp"
+            android:textColor="#FF5252"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_max_mana"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="💙 Max Mana +12"
+            android:textSize="16sp"
+            android:textColor="#448AFF"/>
+
+    </LinearLayout>
+
+    <!-- OK Button -->
+    <Button
+        android:id="@+id/btn_awesome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Awesome!"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:backgroundTint="#BB86FC"
+        android:textColor="#FFFFFF"/>
+
+</LinearLayout>

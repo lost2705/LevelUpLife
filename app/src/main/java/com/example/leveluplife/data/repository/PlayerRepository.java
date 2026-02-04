@@ -3,10 +3,12 @@ package com.example.leveluplife.data.repository;
 import android.app.Application;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.example.leveluplife.data.dao.PlayerDao;
 import com.example.leveluplife.data.database.AppDatabase;
 import com.example.leveluplife.data.entity.Player;
+import com.example.leveluplife.data.model.LevelUpEvent;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,8 +18,19 @@ public class PlayerRepository {
     private final PlayerDao playerDao;
     private final LiveData<Player> player;
     private final ExecutorService executor;
+    private final MutableLiveData<LevelUpEvent> levelUpEventLiveData = new MutableLiveData<>();
 
-    public PlayerRepository(Application application) {
+    private static PlayerRepository instance;  // ✅ Singleton
+
+    // ✅ Добавь метод getInstance
+    public static synchronized PlayerRepository getInstance(Application application) {
+        if (instance == null) {
+            instance = new PlayerRepository(application);
+        }
+        return instance;
+    }
+
+    private PlayerRepository(Application application) {
         AppDatabase database = AppDatabase.getDatabase(application);
         playerDao = database.playerDao();
         player = playerDao.getPlayer();
@@ -39,8 +52,13 @@ public class PlayerRepository {
         executor.execute(() -> {
             Player p = playerDao.getPlayerSync();
             if (p != null) {
-                boolean leveledUp = p.addXp(xp);
+                LevelUpEvent levelUpEvent = p.addXp(xp);
                 playerDao.updatePlayer(p);
+
+                // Если был level-up — отправляем событие
+                if (levelUpEvent != null) {
+                    levelUpEventLiveData.postValue(levelUpEvent);
+                }
             }
         });
     }
@@ -133,5 +151,14 @@ public class PlayerRepository {
                 playerDao.insertPlayer(newPlayer);
             }
         });
+    }
+
+    public LiveData<LevelUpEvent> getLevelUpEvent() {
+        return levelUpEventLiveData;
+    }
+
+    public void notifyLevelUp(LevelUpEvent event) {
+        android.util.Log.d("PlayerRepository", "notifyLevelUp called with level: " + event.newLevel);
+        levelUpEventLiveData.postValue(event);
     }
 }
