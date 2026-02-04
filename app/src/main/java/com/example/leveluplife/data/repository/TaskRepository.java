@@ -24,7 +24,7 @@ public class TaskRepository {
 
     public TaskRepository(Application application, PlayerRepository playerRepository) {
         this.application = application;
-        this.playerRepository = playerRepository;  // ✅ Сохраняем
+        this.playerRepository = playerRepository;
         AppDatabase database = AppDatabase.getDatabase(application);
         taskDao = database.taskDao();
         allTasks = taskDao.getAllTasksLiveData();
@@ -102,26 +102,22 @@ public class TaskRepository {
 
             if (player != null) {
                 if (isCompleted && !wasCompleted) {
-                    // Задача ВЫПОЛНЕНА
                     android.util.Log.d("TaskRepository", "Task completed! Adding XP: " + task.getXpReward());
 
-                    LevelUpEvent levelUpEvent = player.addXp(task.getXpReward());  // ✅ Сохраняем результат!
+                    LevelUpEvent levelUpEvent = player.addXp(task.getXpReward());
                     player.gold += task.getGoldReward();
 
                     android.util.Log.d("TaskRepository", "After addXp - Level: " + player.level + ", XP: " + player.currentXp);
 
-                    // Если был level-up — отправляем событие
                     if (levelUpEvent != null) {
                         android.util.Log.d("TaskRepository", "Level-Up detected! Level: " + levelUpEvent.newLevel);
 
-                        // Уведомляем PlayerRepository о level-up
                         playerRepository.notifyLevelUp(levelUpEvent);
                     } else {
                         android.util.Log.d("TaskRepository", "No level-up happened");
                     }
 
                 } else if (!isCompleted && wasCompleted) {
-                    // Задача ОТМЕНЕНА
                     player.currentXp = Math.max(0, player.currentXp - task.getXpReward());
                     player.gold = Math.max(0, player.gold - task.getGoldReward());
                 }

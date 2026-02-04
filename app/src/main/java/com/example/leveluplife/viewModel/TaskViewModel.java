@@ -20,10 +20,8 @@ public class TaskViewModel extends AndroidViewModel {
     public TaskViewModel(@NonNull Application application) {
         super(application);
 
-        // Сначала создаем PlayerRepository
         PlayerRepository playerRepository = PlayerRepository.getInstance(application);
 
-        // Передаем его в TaskRepository
         repository = new TaskRepository(application, playerRepository);
 
         allTasks = repository.getAllTasks();

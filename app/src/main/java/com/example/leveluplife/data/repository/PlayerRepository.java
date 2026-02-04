@@ -20,9 +20,8 @@ public class PlayerRepository {
     private final ExecutorService executor;
     private final MutableLiveData<LevelUpEvent> levelUpEventLiveData = new MutableLiveData<>();
 
-    private static PlayerRepository instance;  // ✅ Singleton
+    private static PlayerRepository instance;
 
-    // ✅ Добавь метод getInstance
     public static synchronized PlayerRepository getInstance(Application application) {
         if (instance == null) {
             instance = new PlayerRepository(application);
@@ -55,7 +54,6 @@ public class PlayerRepository {
                 LevelUpEvent levelUpEvent = p.addXp(xp);
                 playerDao.updatePlayer(p);
 
-                // Если был level-up — отправляем событие
                 if (levelUpEvent != null) {
                     levelUpEventLiveData.postValue(levelUpEvent);
                 }
@@ -84,9 +82,6 @@ public class PlayerRepository {
         });
     }
 
-    /**
-     * Синхронное добавление XP (для использования внутри транзакций)
-     */
     public void addXpSync(long xp) {
         Player p = playerDao.getPlayerSync();
         if (p != null) {
@@ -95,9 +90,6 @@ public class PlayerRepository {
         }
     }
 
-    /**
-     * Синхронное добавление Gold
-     */
     public void addGoldSync(int amount) {
         Player p = playerDao.getPlayerSync();
         if (p != null) {
@@ -106,15 +98,11 @@ public class PlayerRepository {
         }
     }
 
-    /**
-     * Синхронное вычитание XP
-     */
     public void subtractXpSync(long xp) {
         Player p = playerDao.getPlayerSync();
         if (p != null) {
             p.currentXp = Math.max(0, p.currentXp - xp);
 
-            // Не позволяем уровню упасть ниже 1
             if (p.currentXp < 0 && p.level > 1) {
                 p.level--;
                 p.xpToNextLevel = Player.calculateXpForLevel(p.level + 1);
@@ -125,9 +113,6 @@ public class PlayerRepository {
         }
     }
 
-    /**
-     * Синхронное вычитание Gold
-     */
     public void subtractGoldSync(int amount) {
         Player p = playerDao.getPlayerSync();
         if (p != null) {

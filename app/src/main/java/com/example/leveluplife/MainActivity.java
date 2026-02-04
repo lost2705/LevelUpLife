@@ -37,46 +37,36 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // === VIEWMODEL INITIALIZATION ===
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
 
-        // Создаем игрока при первом запуске
         playerViewModel.initializePlayerIfNeeded();
 
-        // === RECYCLERVIEW SETUP ===
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         adapter = new TaskAdapter();
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // === OBSERVERS ===
-
-        // Tasks observer
         taskViewModel.getAllTasks().observe(this, tasks -> {
             adapter.setTasks(tasks);
         });
 
-        // Player observer (обновление UI)
         playerViewModel.getPlayer().observe(this, player -> {
             if (player != null) {
                 updatePlayerUI(player);
             }
         });
 
-        // Level-Up Observer
         playerViewModel.getLevelUpEvent().observe(this, event -> {
             if (event != null) {
                 showLevelUpDialog(event);
             }
         });
 
-        // === TASK COMPLETION TOGGLE ===
         adapter.setOnTaskCheckedChangeListener((task, isChecked) -> {
             taskViewModel.toggleTaskCompleted(task.getId(), isChecked);
         });
 
-        // === FAB (CREATE TASK) ===
         FloatingActionButton fabAddTask = findViewById(R.id.fabAddTask);
         fabAddTask.setOnClickListener(v -> {
             TaskCreationDialog dialog = new TaskCreationDialog();
@@ -86,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
             dialog.show(getSupportFragmentManager(), "TaskCreationDialog");
         });
 
-        // === SWIPE TO DELETE ===
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
 
@@ -120,61 +109,47 @@ public class MainActivity extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
-    /**
-     * Обновление Player UI в header
-     */
     private void updatePlayerUI(Player player) {
-        // Level
         TextView playerLevelText = findViewById(R.id.playerLevelText);
         if (playerLevelText != null) {
             playerLevelText.setText("Level " + player.level);
         }
 
-        // XP Progress Bar
         ProgressBar xpProgressBar = findViewById(R.id.xpProgressBar);
         if (xpProgressBar != null) {
             xpProgressBar.setMax((int) player.xpToNextLevel);
             xpProgressBar.setProgress((int) player.currentXp);
         }
 
-        // XP Text
         TextView xpText = findViewById(R.id.xpText);
         if (xpText != null) {
             xpText.setText(player.currentXp + "/" + player.xpToNextLevel);
         }
 
-        // Gold
         TextView goldText = findViewById(R.id.goldText);
         if (goldText != null) {
             goldText.setText("💰 Gold: " + player.gold);
         }
 
-        // Gems
         TextView gemsText = findViewById(R.id.gemsText);
         if (gemsText != null) {
             gemsText.setText("💎 Gems: " + player.gems);
         }
 
-        // HP
         TextView hpText = findViewById(R.id.hpText);
         if (hpText != null) {
             hpText.setText("❤️ HP: " + player.currentHp + "/" + player.maxHp);
         }
 
-        // Mana
         TextView manaText = findViewById(R.id.manaText);
         if (manaText != null) {
             manaText.setText("💙 Mana: " + player.currentMana + "/" + player.maxMana);
         }
     }
 
-    /**
-     * Показать Level-Up Dialog
-     */
     private void showLevelUpDialog(LevelUpEvent event) {
         Log.d(TAG, "showLevelUpDialog called! Creating dialog for Level " + event.newLevel);
 
-        // ✅ ИСПРАВЛЕНО: используем правильные поля и методы
         int level = event.newLevel;
         int talentPoints = event.talentPoints;
         int hpGained = event.getHpGain();

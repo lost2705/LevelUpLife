@@ -38,7 +38,6 @@ public class TaskEditDialog extends DialogFragment {
         EditText titleInput = view.findViewById(R.id.taskTitleInput);
         EditText xpInput = view.findViewById(R.id.taskXpInput);
 
-        // Pre-fill current values
         if (task != null) {
             titleInput.setText(task.getTitle());
             xpInput.setText(String.valueOf(task.getXpReward()));

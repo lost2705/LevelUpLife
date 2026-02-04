@@ -24,7 +24,6 @@ public class LevelUpDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        // Получаем данные из Bundle
         if (getArguments() != null) {
             newLevel = getArguments().getInt("level");
             talentPoints = getArguments().getInt("talentPoints");
@@ -36,7 +35,6 @@ public class LevelUpDialog extends DialogFragment {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_level_up, null);
 
-        // ✅ ИСПОЛЬЗУЕМ ПРАВИЛЬНЫЕ ID ИЗ XML
         TextView tvLevelUp = view.findViewById(R.id.tv_level_up);
         TextView tvLevelNumber = view.findViewById(R.id.tv_level_number);
         TextView tvTalentPoints = view.findViewById(R.id.tv_talent_points);
@@ -44,7 +42,6 @@ public class LevelUpDialog extends DialogFragment {
         TextView tvMaxMana = view.findViewById(R.id.tv_max_mana);
         Button btnAwesome = view.findViewById(R.id.btn_awesome);
 
-        // Заполнение данных
         tvLevelUp.setText("🎉 LEVEL UP! 🎉");
         tvLevelNumber.setText("You reached Level " + newLevel + "!");
         tvTalentPoints.setText("⭐ +" + talentPoints + " Talent Point" + (talentPoints > 1 ? "s" : ""));

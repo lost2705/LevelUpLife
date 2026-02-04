@@ -16,12 +16,12 @@ public class PlayerViewModel extends AndroidViewModel {
 
     public PlayerViewModel(@NonNull Application application) {
         super(application);
-        repository = PlayerRepository.getInstance(application);  // ✅ Используем singleton
+        repository = PlayerRepository.getInstance(application);
     }
 
 
     public LiveData<Player> getPlayer() {
-        return repository.getPlayer();  // ✅ Возвращаем напрямую из repository
+        return repository.getPlayer();
     }
 
     public void updatePlayer(Player player) {
