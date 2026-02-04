@@ -7,18 +7,23 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import com.example.leveluplife.data.entity.Task;
+import com.example.leveluplife.data.repository.PlayerRepository;
 import com.example.leveluplife.data.repository.TaskRepository;
 
 import java.util.List;
 
 public class TaskViewModel extends AndroidViewModel {
 
-    private final TaskRepository repository;
-    private final LiveData<List<Task>> allTasks;
+    private TaskRepository repository;
+    private LiveData<List<Task>> allTasks;
 
     public TaskViewModel(@NonNull Application application) {
         super(application);
-        repository = new TaskRepository(application);
+
+        PlayerRepository playerRepository = PlayerRepository.getInstance(application);
+
+        repository = new TaskRepository(application, playerRepository);
+
         allTasks = repository.getAllTasks();
     }
 
@@ -38,6 +43,10 @@ public class TaskViewModel extends AndroidViewModel {
         repository.deleteTask(task);
     }
 
+    public void toggleTaskCompleted(long taskId, boolean isCompleted) {
+        repository.toggleTaskCompletedWithRewards(taskId, isCompleted, getApplication());
+    }
+
     public LiveData<Integer> getTotalXp() {
         return repository.getTotalXp();
     }
@@ -48,9 +57,5 @@ public class TaskViewModel extends AndroidViewModel {
 
     public LiveData<Integer> getPendingTasksCount() {
         return repository.getPendingTasksCount();
-    }
-
-    public void toggleTaskCompleted(long taskId, boolean isCompleted) {
-        repository.toggleTaskCompletedWithRewards(taskId, isCompleted, getApplication());
     }
 }

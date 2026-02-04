@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.example.leveluplife.data.model.LevelUpEvent;
+
 @Entity(tableName = "player")
 public class Player {
 
@@ -94,10 +96,14 @@ public class Player {
         return 50 + (this.intelligence * 3);
     }
 
-    public boolean addXp(long xp) {
+    public LevelUpEvent addXp(long xp) {
         this.currentXp += xp;
 
-        boolean leveledUp = false;
+        LevelUpEvent levelUpEvent = null;
+
+        int oldMaxHp = this.maxHp;
+        int oldMaxMana = this.maxMana;
+        int talentPointsGained = 0;
 
         while (this.currentXp >= this.xpToNextLevel && this.level < 100) {
             this.currentXp -= this.xpToNextLevel;
@@ -105,8 +111,20 @@ public class Player {
             this.xpToNextLevel = calculateXpForLevel(this.level + 1);
 
             this.availableTalentPoints++;
+            talentPointsGained++;
+        }
 
-            leveledUp = true;
+        if (talentPointsGained > 0) {
+            recalculateStats();
+
+            levelUpEvent = new LevelUpEvent(
+                    this.level,
+                    talentPointsGained,
+                    oldMaxHp,
+                    this.maxHp,
+                    oldMaxMana,
+                    this.maxMana
+            );
         }
 
         if (this.level >= 100) {
@@ -116,8 +134,9 @@ public class Player {
         }
 
         this.lastUpdated = System.currentTimeMillis();
-        return leveledUp;
+        return levelUpEvent;
     }
+
 
     public void recalculateStats() {
         int oldMaxHp = this.maxHp;
