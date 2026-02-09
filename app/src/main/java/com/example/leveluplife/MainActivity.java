@@ -1,5 +1,6 @@
 package com.example.leveluplife;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
 
-        // Создаем игрока при первом запуске
         playerViewModel.initializePlayerIfNeeded();
 
         // === RECYCLERVIEW SETUP ===
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         // Level-Up Observer
         playerViewModel.getLevelUpEvent().observe(this, event -> {
             if (event != null) {
-                soundManager.playLevelUp(); // 🔊 ЗВУК LEVEL UP
+                soundManager.playLevelUp();
                 showLevelUpDialog(event);
             }
         });
@@ -113,6 +113,16 @@ public class MainActivity extends AppCompatActivity {
             });
             dialog.show(getSupportFragmentManager(), "TaskCreationDialog");
         });
+
+        // === TALENTS BUTTON ===
+        Button btnTalents = findViewById(R.id.btn_talents);
+        if (btnTalents != null) {
+            btnTalents.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, TalentsActivity.class);
+                startActivity(intent);
+            });
+        }
+
 
         // === SWIPE TO DELETE ===
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(

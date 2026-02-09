@@ -20,6 +20,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".TalentsActivity"
+            android:exported="false"
+            android:label="Talents"
+            android:theme="@style/Theme.LevelUpLife"/>
     </application>
 
 </manifest>

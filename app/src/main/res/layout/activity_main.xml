@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical"
+    android:background="#121212">
 
-    <!-- 🆕 PLAYER STATS HEADER -->
+    <!-- Player Stats Header -->
     <LinearLayout
-        android:id="@+id/playerStatsHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
         android:background="#BB86FC"
-        app:layout_constraintTop_toTopOf="parent">
+        android:padding="16dp"
+        android:elevation="4dp">
 
-        <!-- Row 1: Level + XP Progress -->
+        <!-- Level and XP Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -26,52 +24,51 @@
 
             <TextView
                 android:id="@+id/playerLevelText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Level 1"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginEnd="12dp"/>
-
-            <ProgressBar
-                android:id="@+id/xpProgressBar"
-                style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="0dp"
-                android:layout_height="24dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:max="100"
-                android:progress="0"
-                android:progressTint="#4CAF50"
-                android:progressBackgroundTint="#FFFFFF33"/>
+                android:text="Level 1"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"/>
 
             <TextView
                 android:id="@+id/xpText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0/141"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:layout_marginStart="8dp"/>
+                android:text="0/100"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"/>
 
         </LinearLayout>
 
-        <!-- Row 2: Gold + Gems -->
+        <!-- XP Progress Bar -->
+        <ProgressBar
+            android:id="@+id/xpProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_marginTop="8dp"
+            android:progressTint="#FFD700"
+            android:backgroundTint="#6C4B8A"
+            android:max="100"
+            android:progress="0"/>
+
+        <!-- Resources Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="12dp">
 
             <TextView
                 android:id="@+id/goldText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="💰 Gold: 100"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#FFD700"/>
+                android:text="💰 Gold: 0"
+                android:textSize="14sp"
+                android:textColor="#FFFFFF"/>
 
             <TextView
                 android:id="@+id/gemsText"
@@ -79,14 +76,12 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="💎 Gems: 0"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#00BCD4"
-                android:gravity="end"/>
+                android:textSize="14sp"
+                android:textColor="#FFFFFF"/>
 
         </LinearLayout>
 
-        <!-- Row 3: HP + Mana (опционально) -->
+        <!-- HP and Mana Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -98,7 +93,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="❤️ HP: 150/150"
+                android:text="❤️ HP: 100/100"
                 android:textSize="14sp"
                 android:textColor="#FFFFFF"/>
 
@@ -107,33 +102,44 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="💙 Mana: 80/80"
+                android:text="💙 Mana: 50/50"
                 android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:gravity="end"/>
+                android:textColor="#FFFFFF"/>
 
         </LinearLayout>
 
+        <!-- Talents Button -->
+        <Button
+            android:id="@+id/btn_talents"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚔️ Talents"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="#6C4B8A"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="12dp"/>
+
     </LinearLayout>
 
-    <!-- RECYCLERVIEW (существующий) -->
+    <!-- Tasks RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/playerStatsHeader"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/task_item" />
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:clipToPadding="false"/>
 
-    <!-- FAB (существующий) -->
+    <!-- FAB Add Task -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddTask"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        android:contentDescription="Add Task"
         android:src="@android:drawable/ic_input_add"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:contentDescription="Add Task"
+        app:backgroundTint="#BB86FC"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

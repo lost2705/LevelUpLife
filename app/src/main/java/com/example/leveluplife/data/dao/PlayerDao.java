@@ -26,13 +26,4 @@ public interface PlayerDao {
 
     @Query("SELECT COUNT(*) FROM player WHERE id = 1")
     int playerExists();
-
-    @Query("UPDATE player SET current_xp = current_xp + :xp WHERE id = 1")
-    void addXp(long xp);
-
-    @Query("UPDATE player SET gold = gold + :amount WHERE id = 1")
-    void addGold(int amount);
-
-    @Query("UPDATE player SET gems = gems + :amount WHERE id = 1")
-    void addGems(int amount);
 }
