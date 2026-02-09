@@ -1,167 +1,46 @@
 package com.example.leveluplife.data.entity;
 
-import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.example.leveluplife.data.model.LevelUpEvent;
-
 @Entity(tableName = "player")
 public class Player {
-
     @PrimaryKey
-    public long id;
+    public int id = 1;
 
     public int level;
-
-    @ColumnInfo(name = "current_xp")
     public long currentXp;
-
-    @ColumnInfo(name = "xp_to_next_level")
     public long xpToNextLevel;
-
     public int gold;
     public int gems;
 
-    public int strength;
-    public int agility;
-    public int intelligence;
-    public int charisma;
-
-    @ColumnInfo(name = "max_hp")
+    // HP и Mana
     public int maxHp;
-
-    @ColumnInfo(name = "current_hp")
     public int currentHp;
-
-    @ColumnInfo(name = "max_mana")
     public int maxMana;
-
-    @ColumnInfo(name = "current_mana")
     public int currentMana;
 
-    @ColumnInfo(name = "current_streak")
-    public int currentStreak;
+    public int strength;
+    public int intelligence;
+    public int dexterity;
+    public int talentPoints;
 
-    @ColumnInfo(name = "last_login_date")
-    public long lastLoginDate;
-
-    @ColumnInfo(name = "available_talent_points")
-    public int availableTalentPoints;
-
-    @ColumnInfo(name = "created_at")
-    public long createdAt;
-
-    @ColumnInfo(name = "last_updated")
-    public long lastUpdated;
-
+    // Конструктор
     public Player() {
-        this.id = 1;
         this.level = 1;
         this.currentXp = 0;
-        this.xpToNextLevel = calculateXpForLevel(2);
-
-        this.gold = 100;
+        this.xpToNextLevel = 100;
+        this.gold = 0;
         this.gems = 0;
 
-        this.strength = 10;
-        this.agility = 10;
-        this.intelligence = 10;
-        this.charisma = 10;
+        this.maxHp = 100;
+        this.currentHp = 100;
+        this.maxMana = 50;
+        this.currentMana = 50;
 
-        this.maxHp = calculateMaxHp();
-        this.currentHp = this.maxHp;
-        this.maxMana = calculateMaxMana();
-        this.currentMana = this.maxMana;
-
-        this.currentStreak = 0;
-        this.lastLoginDate = System.currentTimeMillis();
-
-        this.availableTalentPoints = 0;
-
-        this.createdAt = System.currentTimeMillis();
-        this.lastUpdated = System.currentTimeMillis();
-    }
-
-    public static long calculateXpForLevel(int level) {
-        int baseXp = 100;
-        return (long) (baseXp * Math.pow(level, 1.5));
-    }
-
-    public int calculateMaxHp() {
-        return 100 + (this.strength * 5);
-    }
-
-    public int calculateMaxMana() {
-        return 50 + (this.intelligence * 3);
-    }
-
-    public LevelUpEvent addXp(long xp) {
-        this.currentXp += xp;
-
-        LevelUpEvent levelUpEvent = null;
-
-        int oldMaxHp = this.maxHp;
-        int oldMaxMana = this.maxMana;
-        int talentPointsGained = 0;
-
-        while (this.currentXp >= this.xpToNextLevel && this.level < 100) {
-            this.currentXp -= this.xpToNextLevel;
-            this.level++;
-            this.xpToNextLevel = calculateXpForLevel(this.level + 1);
-
-            this.availableTalentPoints++;
-            talentPointsGained++;
-        }
-
-        if (talentPointsGained > 0) {
-            recalculateStats();
-
-            levelUpEvent = new LevelUpEvent(
-                    this.level,
-                    talentPointsGained,
-                    oldMaxHp,
-                    this.maxHp,
-                    oldMaxMana,
-                    this.maxMana
-            );
-        }
-
-        if (this.level >= 100) {
-            this.level = 100;
-            this.currentXp = 0;
-            this.xpToNextLevel = 0;
-        }
-
-        this.lastUpdated = System.currentTimeMillis();
-        return levelUpEvent;
-    }
-
-
-    public void recalculateStats() {
-        int oldMaxHp = this.maxHp;
-        int oldMaxMana = this.maxMana;
-
-        this.maxHp = calculateMaxHp();
-        this.maxMana = calculateMaxMana();
-
-        if (oldMaxHp > 0) {
-            float hpPercent = (float) this.currentHp / oldMaxHp;
-            this.currentHp = (int) (this.maxHp * hpPercent);
-        } else {
-            this.currentHp = this.maxHp;
-        }
-
-        if (oldMaxMana > 0) {
-            float manaPercent = (float) this.currentMana / oldMaxMana;
-            this.currentMana = (int) (this.maxMana * manaPercent);
-        } else {
-            this.currentMana = this.maxMana;
-        }
-    }
-
-    public float getLevelProgress() {
-        if (this.xpToNextLevel == 0) return 1.0f;
-        return (float) this.currentXp / this.xpToNextLevel;
+        this.strength = 5;
+        this.intelligence = 5;
+        this.dexterity = 5;
+        this.talentPoints = 0;
     }
 }
