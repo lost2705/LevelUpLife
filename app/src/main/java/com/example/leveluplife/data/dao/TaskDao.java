@@ -17,7 +17,7 @@ public interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY id DESC")
     LiveData<List<Task>> getAllTasksLiveData();
 
-    @Query("SELECT * FROM tasks WHERE completed = 0 ORDER BY id ASC")
+    @Query("SELECT * FROM tasks WHERE completed = 0 ORDER BY id ASC")  // ✅ completed вместо isCompleted
     LiveData<List<Task>> getPendingTasksLiveData();
 
     @Query("SELECT * FROM tasks ORDER BY id DESC")
@@ -25,18 +25,6 @@ public interface TaskDao {
 
     @Query("SELECT * FROM tasks WHERE id = :taskId")
     Task getTaskById(long taskId);
-
-    @Query("SELECT COALESCE(SUM(xp_reward), 0) FROM tasks WHERE completed = 1")
-    LiveData<Integer> getTotalXp();
-
-    @Query("SELECT COUNT(*) FROM tasks WHERE completed = 1")
-    LiveData<Integer> getCompletedTasksCount();
-
-    @Query("SELECT COUNT(*) FROM tasks WHERE completed = 0")
-    LiveData<Integer> getPendingTasksCount();
-
-    @Query("SELECT COALESCE(SUM(gold_reward), 0) FROM tasks WHERE completed = 1")
-    LiveData<Integer> getTotalGold();
 
     @Insert
     void insertTask(Task task);
@@ -47,7 +35,18 @@ public interface TaskDao {
     @Delete
     void deleteTask(Task task);
 
-    @Query("DELETE FROM tasks")
-    void deleteAll();
-}
+    @Query("SELECT * FROM tasks WHERE frequency = :frequency")
+    LiveData<List<Task>> getTasksByFrequency(String frequency);
 
+    @Query("UPDATE tasks SET completed = 0, lastUpdated = :timestamp WHERE frequency = 'DAILY'")  // ✅ completed
+    void resetDailyTasks(long timestamp);
+
+    @Query("UPDATE tasks SET completed = 0, lastUpdated = :timestamp WHERE frequency = 'WEEKLY'")  // ✅ completed
+    void resetWeeklyTasks(long timestamp);
+
+    @Query("SELECT * FROM tasks WHERE frequency = 'DAILY' AND completed = 1")  // ✅ completed
+    List<Task> getCompletedDailyTasks();
+
+    @Query("SELECT * FROM tasks WHERE frequency = 'WEEKLY' AND completed = 1")  // ✅ completed
+    List<Task> getCompletedWeeklyTasks();
+}

@@ -2,24 +2,52 @@ package com.example.leveluplife.data.entity;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import androidx.room.ColumnInfo;
 
 @Entity(tableName = "tasks")
 public class Task {
 
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
+    private String title;
+    private TaskType taskType;
+    private AttributeType attributeType;
+    private int xpReward;
+    private int goldReward;
+    private boolean completed;
+    private String frequency;
+    private long lastUpdated;
+
+    // ✅ Enum'ы
     public enum TaskType {
-        DAILY, WEEKLY, ONE_TIME
+        DAILY,
+        TODO,
+        HABIT
     }
 
     public enum AttributeType {
-        STRENGTH, AGILITY, INTELLIGENCE, CHARISMA
+        STRENGTH,
+        INTELLIGENCE,
+        DEXTERITY,
+        CONSTITUTION
     }
 
-    public long getId() {
+    public Task(String title, TaskType taskType, AttributeType attributeType, int xpReward, int goldReward) {
+        this.title = title;
+        this.taskType = taskType;
+        this.attributeType = attributeType;
+        this.xpReward = xpReward;
+        this.goldReward = goldReward;
+        this.completed = false;
+        this.frequency = taskType.name();
+        this.lastUpdated = System.currentTimeMillis();
+    }
+
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -29,14 +57,6 @@ public class Task {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public TaskType getTaskType() {
@@ -79,36 +99,19 @@ public class Task {
         this.completed = completed;
     }
 
-    @PrimaryKey(autoGenerate = true)
-    public long id;
+    public String getFrequency() {
+        return frequency;
+    }
 
-    public String title;
+    public void setFrequency(String frequency) {
+        this.frequency = frequency;
+    }
 
-    public String description;
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
 
-    @ColumnInfo(name = "task_type")
-    public TaskType taskType;
-
-    @ColumnInfo(name = "attribute_type")
-    public AttributeType attributeType;
-
-    @ColumnInfo(name = "xp_reward")
-    public int xpReward;
-
-    @ColumnInfo(name = "gold_reward")
-    public int goldReward;
-
-    public boolean completed;
-
-    public Task() {}
-
-    public Task(String title, TaskType taskType, AttributeType attributeType,
-                int xpReward, int goldReward) {
-        this.title = title;
-        this.taskType = taskType;
-        this.attributeType = attributeType;
-        this.xpReward = xpReward;
-        this.goldReward = goldReward;
-        this.completed = false;
+    public void setLastUpdated(long lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

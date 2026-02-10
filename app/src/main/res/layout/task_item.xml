@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:backgroundTint="#1E1E1E"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp">
 
@@ -11,13 +12,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground">
 
         <CheckBox
             android:id="@+id/taskCheckbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:buttonTint="#BB86FC" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -32,15 +35,34 @@
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/black" />
+                android:textColor="@android:color/white"
+                android:text="Task Title" />
 
-            <TextView
-                android:id="@+id/taskXp"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="#666666"
-                android:layout_marginTop="4dp" />
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/taskXp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#BB86FC"
+                    android:text="⭐ +20 XP" />
+
+                <TextView
+                    android:id="@+id/taskGold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:textSize="14sp"
+                    android:textColor="#FFD700"
+                    android:text="💰 +10 Gold"
+                    android:visibility="gone" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
