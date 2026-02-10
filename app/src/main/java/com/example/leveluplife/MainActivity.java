@@ -16,11 +16,11 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.leveluplife.adapter.TaskAdapter;
 import com.example.leveluplife.data.entity.Player;
 import com.example.leveluplife.data.entity.Task;
 import com.example.leveluplife.data.model.LevelUpEvent;
 import com.example.leveluplife.ui.dialogs.TaskCreationDialog;
-import com.example.leveluplife.ui.tasks.TaskAdapter;
 import com.example.leveluplife.utils.SoundManager;
 import com.example.leveluplife.viewModel.PlayerViewModel;
 import com.example.leveluplife.viewModel.TaskViewModel;
@@ -89,12 +89,18 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // === TASK COMPLETION TOGGLE ===
-        adapter.setOnTaskCheckedChangeListener((task, isChecked) -> {
+        adapter.setOnTaskClickListener((task, isChecked) -> {
             taskViewModel.toggleTaskCompleted(task.getId(), isChecked);
 
             if (isChecked) {
                 soundManager.playTaskComplete();
             }
+        });
+
+        // === TASK LONG CLICK (EDIT) ===
+        adapter.setOnTaskLongClickListener(task -> {
+            // TODO: Implement edit dialog in future
+            Log.d(TAG, "Task long clicked: " + task.getTitle());
         });
 
         // === FAB (CREATE TASK) ===
@@ -122,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
-
 
         // === SWIPE TO DELETE ===
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(

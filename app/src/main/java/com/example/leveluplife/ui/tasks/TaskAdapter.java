@@ -1,42 +1,40 @@
-package com.example.leveluplife.ui.tasks;
+package com.example.leveluplife.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.leveluplife.R;
 import com.example.leveluplife.data.entity.Task;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
-    public interface OnTaskCheckedChangeListener {
-        void onTaskCheckedChanged(Task task, boolean isChecked);
-    }
-
-    private OnTaskCheckedChangeListener listener;
-
-    public void setOnTaskCheckedChangeListener(OnTaskCheckedChangeListener listener) {
-        this.listener = listener;
-    }
-
     private List<Task> tasks = new ArrayList<>();
+    private OnTaskClickListener clickListener;
+    private OnTaskLongClickListener longClickListener;
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks.clear();
-        if (tasks != null) this.tasks.addAll(tasks);
-        notifyDataSetChanged();
+    public interface OnTaskClickListener {
+        void onTaskClick(Task task, boolean isChecked);
     }
 
-    public Task getTaskAt(int position) {
-        if (tasks != null && position >= 0 && position < tasks.size()) {
-            return tasks.get(position);
-        }
-        return null;
+    public interface OnTaskLongClickListener {
+        void onTaskLongClick(Task task);
+    }
+
+    public void setOnTaskClickListener(OnTaskClickListener listener) {
+        this.clickListener = listener;
+    }
+
+    public void setOnTaskLongClickListener(OnTaskLongClickListener listener) {
+        this.longClickListener = listener;
     }
 
     @NonNull
@@ -50,41 +48,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         Task task = tasks.get(position);
-
-        holder.titleView.setText(task.getTitle());
-        holder.xpView.setText("XP: " + task.getXpReward());
-
-        holder.checkBox.setOnCheckedChangeListener(null);
-        holder.checkBox.setChecked(task.isCompleted());
-        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (listener != null) {
-                listener.onTaskCheckedChanged(task, isChecked);
-            }
-        });
-
-        holder.itemView.setOnLongClickListener(v -> {
-            if (longClickListener != null) {
-                longClickListener.onTaskLongClick(task);
-                return true;
-            }
-            return false;
-        });
-    }
-
-
-    public interface OnTaskLongClickListener {
-        void onTaskLongClick(Task task);
-    }
-
-    private OnTaskLongClickListener longClickListener;
-
-    public void setOnTaskLongClickListener(OnTaskLongClickListener listener) {
-        this.longClickListener = listener;
+        holder.bind(task);
     }
 
     @Override
     public int getItemCount() {
         return tasks.size();
+    }
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
+        notifyDataSetChanged();
+    }
+
+    public Task getTaskAt(int position) {
+        return tasks.get(position);
     }
 
     class TaskViewHolder extends RecyclerView.ViewHolder {
@@ -100,9 +78,26 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
 
         void bind(Task task) {
-            titleView.setText(task.title);
-            xpView.setText("XP: " + task.xpReward);
-            checkBox.setChecked(task.completed);
+            titleView.setText(task.getTitle());
+            xpView.setText("XP: +" + task.getXpReward());
+            checkBox.setChecked(task.isCompleted());
+
+            checkBox.setOnCheckedChangeListener(null);
+            checkBox.setChecked(task.isCompleted());
+
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (clickListener != null) {
+                    clickListener.onTaskClick(task, isChecked);
+                }
+            });
+
+            itemView.setOnLongClickListener(v -> {
+                if (longClickListener != null) {
+                    longClickListener.onTaskLongClick(task);
+                    return true;
+                }
+                return false;
+            });
         }
     }
 }
