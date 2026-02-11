@@ -18,7 +18,11 @@ public class Task {
     private String frequency;
     private long lastUpdated;
 
-    // ✅ Enum'ы
+    private int currentStreak;
+    private int bestStreak;
+    private long lastCompletedDate;
+    private int totalCompletions;
+
     public enum TaskType {
         DAILY,
         TODO,
@@ -41,6 +45,11 @@ public class Task {
         this.completed = false;
         this.frequency = taskType.name();
         this.lastUpdated = System.currentTimeMillis();
+
+        this.currentStreak = 0;
+        this.bestStreak = 0;
+        this.lastCompletedDate = 0;
+        this.totalCompletions = 0;
     }
 
     public int getId() {
@@ -113,5 +122,37 @@ public class Task {
 
     public void setLastUpdated(long lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public int getCurrentStreak() {
+        return currentStreak;
+    }
+
+    public void setCurrentStreak(int currentStreak) {
+        this.currentStreak = currentStreak;
+    }
+
+    public int getBestStreak() {
+        return bestStreak;
+    }
+
+    public void setBestStreak(int bestStreak) {
+        this.bestStreak = bestStreak;
+    }
+
+    public long getLastCompletedDate() {
+        return lastCompletedDate;
+    }
+
+    public void setLastCompletedDate(long lastCompletedDate) {
+        this.lastCompletedDate = lastCompletedDate;
+    }
+
+    public int getTotalCompletions() {
+        return totalCompletions;
+    }
+
+    public void setTotalCompletions(int totalCompletions) {
+        this.totalCompletions = totalCompletions;
     }
 }

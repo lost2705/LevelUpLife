@@ -15,6 +15,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.example.leveluplife.adapter.TaskAdapter;
 import com.example.leveluplife.data.entity.Player;
@@ -24,6 +27,7 @@ import com.example.leveluplife.ui.dialogs.TaskCreationDialog;
 import com.example.leveluplife.utils.SoundManager;
 import com.example.leveluplife.viewModel.PlayerViewModel;
 import com.example.leveluplife.viewModel.TaskViewModel;
+import com.example.leveluplife.workers.DailyResetWorker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -35,6 +39,7 @@ import nl.dionsegijn.konfetti.core.models.Shape;
 import nl.dionsegijn.konfetti.core.Position;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -162,6 +167,8 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
         itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        scheduleDailyReset();
     }
 
     private void updatePlayerUI(Player player) {
@@ -339,6 +346,40 @@ public class MainActivity extends AppCompatActivity {
         new android.os.Handler().postDelayed(() -> {
             konfettiView.start(partyLeft, partyRight, partyCenter);
         }, 100);
+    }
+
+    private void scheduleDailyReset() {
+        long delayToMidnight = calculateDelayToMidnight();
+
+        PeriodicWorkRequest resetWork = new PeriodicWorkRequest.Builder(
+                DailyResetWorker.class,
+                1, TimeUnit.DAYS
+        )
+                .setInitialDelay(delayToMidnight, TimeUnit.MILLISECONDS)
+                .build();
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "daily_reset",
+                ExistingPeriodicWorkPolicy.KEEP,
+                resetWork
+        );
+
+        Log.d(TAG, "Daily reset scheduled. Next run in " + (delayToMidnight / 1000 / 60) + " minutes");
+    }
+
+    private long calculateDelayToMidnight() {
+        // ✅ PRODUCTION CODE (midnight reset):
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+
+        long midnight = calendar.getTimeInMillis();
+        long now = System.currentTimeMillis();
+
+        return midnight - now;
     }
 
     @Override
