@@ -17,7 +17,7 @@ public interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY id DESC")
     LiveData<List<Task>> getAllTasksLiveData();
 
-    @Query("SELECT * FROM tasks WHERE completed = 0 ORDER BY id ASC")  // ✅ completed вместо isCompleted
+    @Query("SELECT * FROM tasks WHERE completed = 0 ORDER BY id ASC")
     LiveData<List<Task>> getPendingTasksLiveData();
 
     @Query("SELECT * FROM tasks ORDER BY id DESC")
@@ -38,15 +38,18 @@ public interface TaskDao {
     @Query("SELECT * FROM tasks WHERE frequency = :frequency")
     LiveData<List<Task>> getTasksByFrequency(String frequency);
 
-    @Query("UPDATE tasks SET completed = 0, lastUpdated = :timestamp WHERE frequency = 'DAILY'")  // ✅ completed
+    @Query("UPDATE tasks SET completed = 0, lastUpdated = :timestamp WHERE frequency = 'DAILY'")
     void resetDailyTasks(long timestamp);
 
-    @Query("UPDATE tasks SET completed = 0, lastUpdated = :timestamp WHERE frequency = 'WEEKLY'")  // ✅ completed
+    @Query("UPDATE tasks SET completed = 0, lastUpdated = :timestamp WHERE frequency = 'WEEKLY'")
     void resetWeeklyTasks(long timestamp);
 
-    @Query("SELECT * FROM tasks WHERE frequency = 'DAILY' AND completed = 1")  // ✅ completed
+    @Query("SELECT * FROM tasks WHERE frequency = 'DAILY' AND completed = 1")
     List<Task> getCompletedDailyTasks();
 
-    @Query("SELECT * FROM tasks WHERE frequency = 'WEEKLY' AND completed = 1")  // ✅ completed
+    @Query("SELECT * FROM tasks WHERE frequency = 'WEEKLY' AND completed = 1")
     List<Task> getCompletedWeeklyTasks();
+
+    @Query("SELECT * FROM tasks WHERE frequency = :frequency")
+    List<Task> getTasksByFrequencySync(String frequency);
 }

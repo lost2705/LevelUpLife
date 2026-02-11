@@ -15,7 +15,7 @@ import com.example.leveluplife.data.entity.Task;
 
 @Database(
         entities = {Task.class, Player.class, CompletedTask.class},
-        version = 3,
+        version = 4,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -37,7 +37,8 @@ public abstract class AppDatabase extends RoomDatabase {
                             )
                             .addMigrations(
                                     Migrations.MIGRATION_1_2,
-                                    Migrations.MIGRATION_2_3
+                                    Migrations.MIGRATION_2_3,
+                                    Migrations.MIGRATION_3_4
                             )
                             .build();
                 }
