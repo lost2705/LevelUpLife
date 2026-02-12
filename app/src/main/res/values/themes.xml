@@ -1,9 +1,30 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.LevelUpLife" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Theme.LevelUpLife" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">#BB86FC</item>
+        <item name="colorPrimaryVariant">#6200EE</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#03DAC5</item>
+        <item name="colorSecondaryVariant">#018786</item>
+        <item name="colorOnSecondary">#000000</item>
+        <item name="android:statusBarColor">#6200EE</item>
     </style>
 
-    <style name="Theme.LevelUpLife" parent="Base.Theme.LevelUpLife" />
+    <style name="DarkDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="android:background">#1E1E1E</item>
+        <item name="colorSurface">#1E1E1E</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="colorPrimary">#BB86FC</item>
+        <item name="colorAccent">#BB86FC</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+    </style>
+
+    <style name="NegativeButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">#AAAAAA</item>
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">#BB86FC</item>
+    </style>
 </resources>
