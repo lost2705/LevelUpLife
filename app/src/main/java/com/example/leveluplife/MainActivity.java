@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -24,6 +25,7 @@ import com.example.leveluplife.data.entity.Player;
 import com.example.leveluplife.data.entity.Task;
 import com.example.leveluplife.data.model.LevelUpEvent;
 import com.example.leveluplife.ui.dialogs.TaskCreationDialog;
+import com.example.leveluplife.ui.dialogs.TaskEditDialog;
 import com.example.leveluplife.utils.SoundManager;
 import com.example.leveluplife.viewModel.PlayerViewModel;
 import com.example.leveluplife.viewModel.TaskViewModel;
@@ -94,18 +96,40 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // === TASK COMPLETION TOGGLE ===
-        adapter.setOnTaskClickListener((task, isChecked) -> {
-            taskViewModel.toggleTaskCompleted(task.getId(), isChecked);
+        adapter.setOnTaskClickListener((task, position) -> {
+            boolean wasCompleted = task.isCompleted();
+            task.setCompleted(!wasCompleted);
 
-            if (isChecked) {
+            if (task.isCompleted()) {
+                playerViewModel.addXp(task.getXpReward());
+                playerViewModel.addGold(task.getGoldReward());
                 soundManager.playTaskComplete();
+
+                taskViewModel.updateTask(task);
+
+                Snackbar.make(findViewById(android.R.id.content),
+                        "+" + task.getXpReward() + " XP, +" + task.getGoldReward() + " Gold",
+                        Snackbar.LENGTH_SHORT).show();
+            } else {
+                playerViewModel.removeXp(task.getXpReward());
+                playerViewModel.removeGold(task.getGoldReward());
+
+                taskViewModel.updateTask(task);
+
+                Snackbar.make(findViewById(android.R.id.content),
+                        "-" + task.getXpReward() + " XP, -" + task.getGoldReward() + " Gold",
+                        Snackbar.LENGTH_SHORT).show();
             }
         });
 
-        // === TASK LONG CLICK (EDIT) ===
+
         adapter.setOnTaskLongClickListener(task -> {
-            // TODO: Implement edit dialog in future
-            Log.d(TAG, "Task long clicked: " + task.getTitle());
+            TaskEditDialog editDialog = TaskEditDialog.newInstance(task);
+            editDialog.setOnTaskEditedListener(updatedTask -> {
+                taskViewModel.updateTask(updatedTask);
+                Toast.makeText(MainActivity.this, "Task updated!", Toast.LENGTH_SHORT).show();
+            });
+            editDialog.show(getSupportFragmentManager(), "TaskEditDialog");
         });
 
         // === FAB (CREATE TASK) ===
@@ -175,16 +199,16 @@ public class MainActivity extends AppCompatActivity {
         // Level
         TextView playerLevelText = findViewById(R.id.playerLevelText);
         if (playerLevelText != null) {
-            playerLevelText.setText("Level " + player.level);
+            playerLevelText.setText("Level " + player.getLevel());
         }
 
         // XP Progress Bar
         ProgressBar xpProgressBar = findViewById(R.id.xpProgressBar);
         if (xpProgressBar != null) {
             int oldProgress = xpProgressBar.getProgress();
-            int newProgress = (int) player.currentXp;
+            int newProgress = (int) player.getCurrentXp();
 
-            xpProgressBar.setMax((int) player.xpToNextLevel);
+            xpProgressBar.setMax((int) player.getXpToNextLevel());
 
             android.animation.ObjectAnimator animator = android.animation.ObjectAnimator.ofInt(
                     xpProgressBar,
@@ -200,31 +224,31 @@ public class MainActivity extends AppCompatActivity {
         // XP Text
         TextView xpText = findViewById(R.id.xpText);
         if (xpText != null) {
-            xpText.setText(player.currentXp + "/" + player.xpToNextLevel);
+            xpText.setText(player.getCurrentXp() + "/" + player.getXpToNextLevel());
         }
 
         // Gold
         TextView goldText = findViewById(R.id.goldText);
         if (goldText != null) {
-            goldText.setText("💰 Gold: " + player.gold);
+            goldText.setText("💰 Gold: " + player.getGold());
         }
 
         // Gems
         TextView gemsText = findViewById(R.id.gemsText);
         if (gemsText != null) {
-            gemsText.setText("💎 Gems: " + player.gems);
+            gemsText.setText("💎 Gems: " + player.getGems());
         }
 
         // HP
         TextView hpText = findViewById(R.id.hpText);
         if (hpText != null) {
-            hpText.setText("❤️ HP: " + player.currentHp + "/" + player.maxHp);
+            hpText.setText("❤️ HP: " + player.getCurrentHp() + "/" + player.getMaxHp());
         }
 
         // Mana
         TextView manaText = findViewById(R.id.manaText);
         if (manaText != null) {
-            manaText.setText("💙 Mana: " + player.currentMana + "/" + player.maxMana);
+            manaText.setText("💙 Mana: " + player.getCurrentMana() + "/" + player.getMaxMana());
         }
     }
 
@@ -368,7 +392,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private long calculateDelayToMidnight() {
-        // ✅ PRODUCTION CODE (midnight reset):
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);

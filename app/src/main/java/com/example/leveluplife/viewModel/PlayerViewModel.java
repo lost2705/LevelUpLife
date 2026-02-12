@@ -32,54 +32,24 @@ public class PlayerViewModel extends AndroidViewModel {
         repository.updatePlayer(player);
     }
 
-    public void addXp(int xp) {
-        executor.execute(() -> {
-            Player player = repository.getPlayerSync();
-            if (player != null) {
-                player.currentXp += xp;
+    public void addXp(long xp) {
+        repository.addXp(xp);
+    }
 
-                while (player.currentXp >= player.xpToNextLevel) {
-                    player.currentXp -= player.xpToNextLevel;
-                    player.level++;
-
-                    player.talentPoints++;
-
-                    int oldMaxHp = player.maxHp;
-                    int oldMaxMana = player.maxMana;
-
-                    player.maxHp += 25;
-                    player.currentHp = player.maxHp;
-                    player.maxMana += 12;
-                    player.currentMana = player.maxMana;
-                    player.xpToNextLevel = (long) (player.xpToNextLevel * 1.5);
-
-                    LevelUpEvent event = new LevelUpEvent(
-                            player.level,
-                            1,
-                            oldMaxHp,
-                            player.maxHp,
-                            oldMaxMana,
-                            player.maxMana
-                    );
-
-                    repository.triggerLevelUpEvent(event);
-                }
-
-                repository.updatePlayer(player);
-            }
-        });
+    public void removeXp(int amount) {
+        repository.removeXp(amount);
     }
 
     public void addGold(int amount) {
         repository.addGold(amount);
     }
 
-    public void addGems(int amount) {
-        repository.addGems(amount);
+    public void removeGold(int amount) {
+        repository.removeGold(amount);
     }
 
-    public void initializePlayerIfNeeded() {
-        repository.initializePlayerIfNeeded();
+    public void addGems(int amount) {
+        repository.addGems(amount);
     }
 
     public void subtractXp(long xp) {
@@ -90,6 +60,10 @@ public class PlayerViewModel extends AndroidViewModel {
         repository.subtractGold(amount);
     }
 
+    public void initializePlayerIfNeeded() {
+        repository.initializePlayerIfNeeded();
+    }
+
     public LiveData<LevelUpEvent> getLevelUpEvent() {
         return repository.getLevelUpEvent();
     }
@@ -98,19 +72,23 @@ public class PlayerViewModel extends AndroidViewModel {
         executor.execute(() -> {
             Player player = repository.getPlayerSync();
             if (player != null) {
-                player.strength = strength;
-                player.intelligence = intelligence;
-                player.dexterity = dexterity;
-                player.talentPoints = talentPoints;
+                player.setStrength(strength);
+                player.setIntelligence(intelligence);
+                player.setDexterity(dexterity);
+                player.setTalentPoints(talentPoints);
 
-                player.maxHp = 100 + (strength * 10);
-                player.maxMana = 50 + (intelligence * 5);
+                // Recalculate stats based on attributes
+                int newMaxHp = 100 + (strength * 10);
+                int newMaxMana = 50 + (intelligence * 5);
 
-                if (player.currentHp < player.maxHp) {
-                    player.currentHp = player.maxHp;
+                player.setMaxHp(newMaxHp);
+                player.setMaxMana(newMaxMana);
+
+                if (player.getCurrentHp() < newMaxHp) {
+                    player.setCurrentHp(newMaxHp);
                 }
-                if (player.currentMana < player.maxMana) {
-                    player.currentMana = player.maxMana;
+                if (player.getCurrentMana() < newMaxMana) {
+                    player.setCurrentMana(newMaxMana);
                 }
 
                 repository.updatePlayer(player);

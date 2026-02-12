@@ -61,11 +61,40 @@ public class PlayerRepository {
         });
     }
 
-    public void addXp(int xp) {
+    public void addXp(long amount) {
         executor.execute(() -> {
             Player player = playerDao.getPlayerSync();
             if (player != null) {
-                player.currentXp += xp;
+                long newXp = player.getCurrentXp() + amount;
+                long xpToNextLevel = player.getXpToNextLevel();
+
+                while (newXp >= xpToNextLevel) {
+                    newXp -= xpToNextLevel;
+                    player.setLevel(player.getLevel() + 1);
+                    xpToNextLevel = calculateXpForNextLevel(player.getLevel());
+                    player.setXpToNextLevel(xpToNextLevel);
+                    player.setTalentPoints(player.getTalentPoints() + 1);
+
+                    player.setMaxHp(player.getMaxHp() + 10);
+                    player.setCurrentHp(player.getMaxHp());
+                    player.setMaxMana(player.getMaxMana() + 5);
+                    player.setCurrentMana(player.getMaxMana());
+
+                    player.setStrength(player.getStrength() + 1);
+                    player.setIntelligence(player.getIntelligence() + 1);
+                    player.setDexterity(player.getDexterity() + 1);
+
+                    levelUpEvent.postValue(new LevelUpEvent(
+                            player.getLevel(),
+                            player.getMaxHp(),
+                            player.getMaxMana(),
+                            player.getStrength(),
+                            player.getIntelligence(),
+                            player.getDexterity()
+                    ));
+                }
+
+                player.setCurrentXp(newXp);
                 playerDao.updatePlayer(player);
             }
         });
@@ -75,7 +104,8 @@ public class PlayerRepository {
         executor.execute(() -> {
             Player player = playerDao.getPlayerSync();
             if (player != null) {
-                player.currentXp = Math.max(0, player.currentXp - xp);
+                long newXp = Math.max(0, player.getCurrentXp() - xp);
+                player.setCurrentXp(newXp);
                 playerDao.updatePlayer(player);
             }
         });
@@ -85,7 +115,7 @@ public class PlayerRepository {
         executor.execute(() -> {
             Player player = playerDao.getPlayerSync();
             if (player != null) {
-                player.gold += amount;
+                player.setGold(player.getGold() + amount);
                 playerDao.updatePlayer(player);
             }
         });
@@ -95,7 +125,34 @@ public class PlayerRepository {
         executor.execute(() -> {
             Player player = playerDao.getPlayerSync();
             if (player != null) {
-                player.gold = Math.max(0, player.gold - amount);
+                int newGold = Math.max(0, player.getGold() - amount);
+                player.setGold(newGold);
+                playerDao.updatePlayer(player);
+            }
+        });
+    }
+
+    public void removeXp(int amount) {
+        executor.execute(() -> {
+            Player player = playerDao.getPlayerSync();
+            if (player != null) {
+                int newXp = (int) (player.getCurrentXp() - amount);
+                if (newXp < 0) newXp = 0;
+
+                player.setCurrentXp(newXp);
+                playerDao.updatePlayer(player);
+            }
+        });
+    }
+
+    public void removeGold(int amount) {
+        executor.execute(() -> {
+            Player player = playerDao.getPlayerSync();
+            if (player != null) {
+                int newGold = player.getGold() - amount;
+                if (newGold < 0) newGold = 0;
+
+                player.setGold(newGold);
                 playerDao.updatePlayer(player);
             }
         });
@@ -105,7 +162,7 @@ public class PlayerRepository {
         executor.execute(() -> {
             Player player = playerDao.getPlayerSync();
             if (player != null) {
-                player.gems += amount;
+                player.setGems(player.getGems() + amount);
                 playerDao.updatePlayer(player);
             }
         });
@@ -117,5 +174,9 @@ public class PlayerRepository {
 
     public void triggerLevelUpEvent(LevelUpEvent event) {
         levelUpEvent.postValue(event);
+    }
+
+    private long calculateXpForNextLevel(int level) {
+        return 100 + (level * 50);
     }
 }

@@ -67,10 +67,10 @@ public class TalentsActivity extends AppCompatActivity {
     }
 
     private void initializeTempValues(Player player) {
-        tempStrength = player.strength;
-        tempIntelligence = player.intelligence;
-        tempDexterity = player.dexterity;
-        tempTalentPoints = player.talentPoints;
+        tempStrength = player.getStrength();
+        tempIntelligence = player.getIntelligence();
+        tempDexterity = player.getDexterity();
+        tempTalentPoints = player.getTalentPoints();
     }
 
     private void setupButtonListeners() {
