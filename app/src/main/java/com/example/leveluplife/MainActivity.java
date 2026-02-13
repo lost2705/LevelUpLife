@@ -33,17 +33,17 @@ import com.example.leveluplife.workers.DailyResetWorker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import nl.dionsegijn.konfetti.xml.KonfettiView;
-import nl.dionsegijn.konfetti.core.Party;
-import nl.dionsegijn.konfetti.core.PartyFactory;
-import nl.dionsegijn.konfetti.core.emitter.Emitter;
-import nl.dionsegijn.konfetti.core.models.Shape;
-import nl.dionsegijn.konfetti.core.Position;
-
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import nl.dionsegijn.konfetti.core.Party;
+import nl.dionsegijn.konfetti.core.PartyFactory;
+import nl.dionsegijn.konfetti.core.Position;
+import nl.dionsegijn.konfetti.core.emitter.Emitter;
+import nl.dionsegijn.konfetti.core.models.Shape;
+import nl.dionsegijn.konfetti.xml.KonfettiView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        scheduleDailyReset();
 
         // === SOUND MANAGER INITIALIZATION ===
         soundManager = SoundManager.getInstance(this);
@@ -101,23 +103,29 @@ public class MainActivity extends AppCompatActivity {
             task.setCompleted(!wasCompleted);
 
             if (task.isCompleted()) {
-                playerViewModel.addXp(task.getXpReward());
-                playerViewModel.addGold(task.getGoldReward());
-                soundManager.playTaskComplete();
+                if (!task.isRewardClaimed()) {
+                    playerViewModel.addXp(task.getXpReward());
+                    playerViewModel.addGold(task.getGoldReward());
+                    soundManager.playTaskComplete();
+
+                    task.setRewardClaimed(true);
+
+                    Snackbar.make(findViewById(android.R.id.content),
+                            "✅ +" + task.getXpReward() + " XP, +" + task.getGoldReward() + " Gold",
+                            Snackbar.LENGTH_SHORT).show();
+                } else {
+                    Snackbar.make(findViewById(android.R.id.content),
+                            "✅ Task completed (reward already claimed)",
+                            Snackbar.LENGTH_SHORT).show();
+                }
 
                 taskViewModel.updateTask(task);
 
-                Snackbar.make(findViewById(android.R.id.content),
-                        "+" + task.getXpReward() + " XP, +" + task.getGoldReward() + " Gold",
-                        Snackbar.LENGTH_SHORT).show();
             } else {
-                playerViewModel.removeXp(task.getXpReward());
-                playerViewModel.removeGold(task.getGoldReward());
-
                 taskViewModel.updateTask(task);
 
                 Snackbar.make(findViewById(android.R.id.content),
-                        "-" + task.getXpReward() + " XP, -" + task.getGoldReward() + " Gold",
+                        "Task unchecked",
                         Snackbar.LENGTH_SHORT).show();
             }
         });
@@ -191,8 +199,6 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
         itemTouchHelper.attachToRecyclerView(recyclerView);
-
-        scheduleDailyReset();
     }
 
     private void updatePlayerUI(Player player) {

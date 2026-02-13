@@ -38,10 +38,10 @@ public interface TaskDao {
     @Query("SELECT * FROM tasks WHERE frequency = :frequency")
     LiveData<List<Task>> getTasksByFrequency(String frequency);
 
-    @Query("UPDATE tasks SET completed = 0, lastUpdated = :timestamp WHERE frequency = 'DAILY'")
+    @Query("UPDATE tasks SET completed = 0, rewardClaimed = 0, lastUpdated = :timestamp WHERE frequency = 'DAILY'")
     void resetDailyTasks(long timestamp);
 
-    @Query("UPDATE tasks SET completed = 0, lastUpdated = :timestamp WHERE frequency = 'WEEKLY'")
+    @Query("UPDATE tasks SET completed = 0, rewardClaimed = 0, lastUpdated = :timestamp WHERE frequency = 'WEEKLY'")
     void resetWeeklyTasks(long timestamp);
 
     @Query("SELECT * FROM tasks WHERE frequency = 'DAILY' AND completed = 1")

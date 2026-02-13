@@ -22,6 +22,7 @@ public class Task {
     private int bestStreak;
     private long lastCompletedDate;
     private int totalCompletions;
+    private boolean rewardClaimed;
 
     public enum TaskType {
         DAILY,
@@ -82,6 +83,14 @@ public class Task {
 
     public void setAttributeType(AttributeType attributeType) {
         this.attributeType = attributeType;
+    }
+
+    public boolean isRewardClaimed() {
+        return rewardClaimed;
+    }
+
+    public void setRewardClaimed(boolean rewardClaimed) {
+        this.rewardClaimed = rewardClaimed;
     }
 
     public int getXpReward() {
