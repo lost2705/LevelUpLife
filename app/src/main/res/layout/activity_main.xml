@@ -108,18 +108,6 @@
 
         </LinearLayout>
 
-        <!-- Talents Button -->
-        <Button
-            android:id="@+id/btn_talents"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="⚔️ Talents"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:backgroundTint="#6C4B8A"
-            android:textColor="#FFFFFF"
-            android:layout_marginTop="12dp"/>
-
     </LinearLayout>
 
     <!-- Tasks RecyclerView -->
@@ -141,5 +129,20 @@
         android:src="@android:drawable/ic_input_add"
         android:contentDescription="Add Task"
         app:backgroundTint="#BB86FC"/>
+
+    <Button
+        android:id="@+id/btn_talents"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#BB86FC"
+        android:text="⭐ Talents"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/recyclerView" />
+
 
 </LinearLayout>
