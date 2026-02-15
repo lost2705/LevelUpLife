@@ -35,7 +35,7 @@ public interface TaskDao {
     @Delete
     void deleteTask(Task task);
 
-    @Query("SELECT * FROM tasks WHERE frequency = :frequency")
+    @Query("SELECT * FROM tasks WHERE frequency = :frequency ORDER BY id DESC")
     LiveData<List<Task>> getTasksByFrequency(String frequency);
 
     @Query("UPDATE tasks SET completed = 0, rewardClaimed = 0, lastUpdated = :timestamp WHERE frequency = 'DAILY'")

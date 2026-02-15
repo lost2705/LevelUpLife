@@ -28,6 +28,10 @@ public class TaskRepository {
         return allTasks;
     }
 
+    public LiveData<List<Task>> getTasksByFrequency(String frequency) {
+        return taskDao.getTasksByFrequency(frequency);
+    }
+
     public LiveData<List<Task>> getPendingTasks() {
         return taskDao.getPendingTasksLiveData();
     }
