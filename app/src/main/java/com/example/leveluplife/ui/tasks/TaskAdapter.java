@@ -1,5 +1,6 @@
-package com.example.leveluplife.adapter;
+package com.example.leveluplife.ui.tasks;
 
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.leveluplife.R;
@@ -22,7 +24,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private OnTaskLongClickListener longClickListener;
 
     public interface OnTaskClickListener {
-        void onTaskClick(Task task, boolean isChecked);
+        void onTaskClick(Task task, int position);
     }
 
     public interface OnTaskLongClickListener {
@@ -48,7 +50,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         Task task = tasks.get(position);
-        holder.bind(task);
+        holder.bind(task, position);
     }
 
     @Override
@@ -56,9 +58,45 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         return tasks.size();
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
-        notifyDataSetChanged();
+    public void setTasks(List<Task> newTasks) {
+        if (this.tasks.isEmpty()) {
+            this.tasks = new ArrayList<>(newTasks);
+            notifyDataSetChanged();
+            return;
+        }
+
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return tasks.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newTasks.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                return tasks.get(oldItemPosition).getId() == newTasks.get(newItemPosition).getId();
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                Task oldTask = tasks.get(oldItemPosition);
+                Task newTask = newTasks.get(newItemPosition);
+
+                return oldTask.getId() == newTask.getId() &&
+                        oldTask.getTitle().equals(newTask.getTitle()) &&
+                        oldTask.isCompleted() == newTask.isCompleted() &&
+                        oldTask.isRewardClaimed() == newTask.isRewardClaimed() &&
+                        oldTask.getXpReward() == newTask.getXpReward() &&
+                        oldTask.getGoldReward() == newTask.getGoldReward();
+            }
+        });
+
+        this.tasks = new ArrayList<>(newTasks);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     public Task getTaskAt(int position) {
@@ -66,34 +104,55 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     class TaskViewHolder extends RecyclerView.ViewHolder {
-        private final TextView titleView;
-        private final TextView xpView;
-        private final CheckBox checkBox;
+        private CheckBox checkBox;
+        private TextView titleText;
+        private TextView xpText;
 
-        TaskViewHolder(@NonNull View itemView) {
+        public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
-            titleView = itemView.findViewById(R.id.taskTitle);
-            xpView = itemView.findViewById(R.id.taskXp);
             checkBox = itemView.findViewById(R.id.taskCheckbox);
+            titleText = itemView.findViewById(R.id.taskTitle);
+            xpText = itemView.findViewById(R.id.taskXp);
         }
 
-        void bind(Task task) {
-            titleView.setText(task.getTitle());
-            xpView.setText("XP: +" + task.getXpReward());
-            checkBox.setChecked(task.isCompleted());
+        public void bind(Task task, int position) {
 
             checkBox.setOnCheckedChangeListener(null);
-            checkBox.setChecked(task.isCompleted());
+            itemView.setOnClickListener(null);
+            itemView.setOnLongClickListener(null);
 
-            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (clickListener != null) {
-                    clickListener.onTaskClick(task, isChecked);
+            titleText.setText(task.getTitle());
+            xpText.setText("⭐ +" + task.getXpReward() + " XP");
+
+            boolean isCompleted = task.isCompleted();
+            checkBox.setChecked(isCompleted);
+            checkBox.jumpDrawablesToCurrentState();
+
+            if (isCompleted) {
+                titleText.setPaintFlags(titleText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                titleText.setAlpha(0.5f);
+            } else {
+                titleText.setPaintFlags(titleText.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+                titleText.setAlpha(1.0f);
+            }
+
+
+            itemView.setOnClickListener(v -> {
+                int currentPosition = getAdapterPosition();
+
+                if (currentPosition != RecyclerView.NO_POSITION && clickListener != null) {
+                    Task currentTask = tasks.get(currentPosition);
+                    clickListener.onTaskClick(currentTask, currentPosition);
+                } else {
+                    android.util.Log.e("TaskAdapter", "Click NOT processed! Position: " + currentPosition + ", listener: " + clickListener);
                 }
             });
 
             itemView.setOnLongClickListener(v -> {
-                if (longClickListener != null) {
-                    longClickListener.onTaskLongClick(task);
+                int currentPosition = getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION && longClickListener != null) {
+                    Task currentTask = tasks.get(currentPosition);
+                    longClickListener.onTaskLongClick(currentTask);
                     return true;
                 }
                 return false;

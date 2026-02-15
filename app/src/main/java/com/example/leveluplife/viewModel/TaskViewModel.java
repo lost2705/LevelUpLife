@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.leveluplife.data.entity.Task;
@@ -23,6 +24,7 @@ public class TaskViewModel extends AndroidViewModel {
     private final PlayerViewModel playerViewModel;
     private final LiveData<List<Task>> allTasks;
     private final ExecutorService executor;
+    private final MutableLiveData<String> currentFilter = new MutableLiveData<>("ALL");
 
     public TaskViewModel(@NonNull Application application) {
         super(application);
@@ -79,6 +81,19 @@ public class TaskViewModel extends AndroidViewModel {
                 playerViewModel.subtractGold(task.getGoldReward());
             }
         });
+    }
+
+    public LiveData<List<Task>> getFilteredTasks() {
+        String filter = currentFilter.getValue();
+        if (filter == null || filter.equals("ALL")) {
+            return repository.getAllTasks();
+        } else {
+            return repository.getTasksByFrequency(filter);
+        }
+    }
+
+    public void setFilter(String filter) {
+        currentFilter.setValue(filter);
     }
 
     @Override

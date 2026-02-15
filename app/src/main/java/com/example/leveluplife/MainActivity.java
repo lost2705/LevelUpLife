@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,16 +21,17 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import com.example.leveluplife.adapter.TaskAdapter;
 import com.example.leveluplife.data.entity.Player;
 import com.example.leveluplife.data.entity.Task;
 import com.example.leveluplife.data.model.LevelUpEvent;
 import com.example.leveluplife.ui.dialogs.TaskCreationDialog;
 import com.example.leveluplife.ui.dialogs.TaskEditDialog;
+import com.example.leveluplife.ui.tasks.TaskAdapter;
 import com.example.leveluplife.utils.SoundManager;
 import com.example.leveluplife.viewModel.PlayerViewModel;
 import com.example.leveluplife.viewModel.TaskViewModel;
 import com.example.leveluplife.workers.DailyResetWorker;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private PlayerViewModel playerViewModel;
     private TaskAdapter adapter;
     private SoundManager soundManager;
+    private LiveData<List<Task>> currentTasksLiveData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,21 +78,40 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // === OBSERVERS ===
+        ChipGroup chipGroupFilters = findViewById(R.id.chipGroupFilters);
 
-        // Tasks observer
-        taskViewModel.getAllTasks().observe(this, tasks -> {
+        chipGroupFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (!checkedIds.isEmpty()) {
+                int checkedId = checkedIds.get(0);
+                String filter;
+
+                if (checkedId == R.id.chipAll) {
+                    filter = "ALL";
+                } else if (checkedId == R.id.chipDaily) {
+                    filter = "DAILY";
+                } else if (checkedId == R.id.chipTodo) {
+                    filter = "TODO";
+                } else if (checkedId == R.id.chipHabit) {
+                    filter = "HABIT";
+                } else {
+                    filter = "ALL";
+                }
+
+                applyFilter(filter);
+            }
+        });
+
+        currentTasksLiveData = taskViewModel.getAllTasks();
+        currentTasksLiveData.observe(this, tasks -> {
             adapter.setTasks(tasks);
         });
 
-        // Player observer
         playerViewModel.getPlayer().observe(this, player -> {
             if (player != null) {
                 updatePlayerUI(player);
             }
         });
 
-        // Level-Up Observer
         playerViewModel.getLevelUpEvent().observe(this, event -> {
             if (event != null) {
                 soundManager.playLevelUp();
@@ -99,8 +121,12 @@ public class MainActivity extends AppCompatActivity {
 
         // === TASK COMPLETION TOGGLE ===
         adapter.setOnTaskClickListener((task, position) -> {
-            boolean wasCompleted = task.isCompleted();
+             boolean wasCompleted = task.isCompleted();
             task.setCompleted(!wasCompleted);
+
+            taskViewModel.updateTask(task);
+
+            adapter.notifyItemChanged(position);
 
             if (task.isCompleted()) {
                 if (!task.isRewardClaimed()) {
@@ -109,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
                     soundManager.playTaskComplete();
 
                     task.setRewardClaimed(true);
+                    taskViewModel.updateTask(task);
 
                     Snackbar.make(findViewById(android.R.id.content),
                             "✅ +" + task.getXpReward() + " XP, +" + task.getGoldReward() + " Gold",
@@ -118,18 +145,12 @@ public class MainActivity extends AppCompatActivity {
                             "✅ Task completed (reward already claimed)",
                             Snackbar.LENGTH_SHORT).show();
                 }
-
-                taskViewModel.updateTask(task);
-
             } else {
-                taskViewModel.updateTask(task);
-
                 Snackbar.make(findViewById(android.R.id.content),
                         "Task unchecked",
                         Snackbar.LENGTH_SHORT).show();
             }
         });
-
 
         adapter.setOnTaskLongClickListener(task -> {
             TaskEditDialog editDialog = TaskEditDialog.newInstance(task);
@@ -409,6 +430,23 @@ public class MainActivity extends AppCompatActivity {
         long now = System.currentTimeMillis();
 
         return midnight - now;
+    }
+
+    private void applyFilter(String filter) {
+        if (currentTasksLiveData != null) {
+            currentTasksLiveData.removeObservers(this);
+        }
+
+        if (filter.equals("ALL")) {
+            currentTasksLiveData = taskViewModel.getAllTasks();
+        } else {
+            taskViewModel.setFilter(filter);
+            currentTasksLiveData = taskViewModel.getFilteredTasks();
+        }
+
+        currentTasksLiveData.observe(this, tasks -> {
+            adapter.setTasks(tasks);
+        });
     }
 
     @Override
