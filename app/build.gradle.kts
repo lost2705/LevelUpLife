@@ -52,5 +52,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-common-java8:2.10.0")
     implementation("nl.dionsegijn:konfetti-xml:2.0.4")
     implementation("androidx.work:work-runtime:2.9.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }
