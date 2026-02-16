@@ -29,6 +29,11 @@
             android:label="Talents"
             android:theme="@style/Theme.LevelUpLife"/>
 
+        <activity
+            android:name=".StatisticsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LevelUpLife" />
+
     </application>
 
 </manifest>

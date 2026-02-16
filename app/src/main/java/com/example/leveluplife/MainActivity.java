@@ -21,6 +21,7 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.example.leveluplife.data.entity.CompletedTask;
 import com.example.leveluplife.data.entity.Player;
 import com.example.leveluplife.data.entity.Task;
 import com.example.leveluplife.data.model.LevelUpEvent;
@@ -28,6 +29,7 @@ import com.example.leveluplife.ui.dialogs.TaskCreationDialog;
 import com.example.leveluplife.ui.dialogs.TaskEditDialog;
 import com.example.leveluplife.ui.tasks.TaskAdapter;
 import com.example.leveluplife.utils.SoundManager;
+import com.example.leveluplife.viewModel.CompletedTaskViewModel;
 import com.example.leveluplife.viewModel.PlayerViewModel;
 import com.example.leveluplife.viewModel.TaskViewModel;
 import com.example.leveluplife.workers.DailyResetWorker;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private TaskAdapter adapter;
     private SoundManager soundManager;
     private LiveData<List<Task>> currentTasksLiveData;
+    private CompletedTaskViewModel completedTaskViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         // === VIEWMODEL INITIALIZATION ===
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+        completedTaskViewModel = new ViewModelProvider(this).get(CompletedTaskViewModel.class);
 
         playerViewModel.initializePlayerIfNeeded();
 
@@ -121,36 +125,46 @@ public class MainActivity extends AppCompatActivity {
 
         // === TASK COMPLETION TOGGLE ===
         adapter.setOnTaskClickListener((task, position) -> {
-             boolean wasCompleted = task.isCompleted();
+            boolean wasCompleted = task.isCompleted();
             task.setCompleted(!wasCompleted);
+            task.setLastUpdated(System.currentTimeMillis());
 
             taskViewModel.updateTask(task);
-
             adapter.notifyItemChanged(position);
 
-            if (task.isCompleted()) {
-                if (!task.isRewardClaimed()) {
-                    playerViewModel.addXp(task.getXpReward());
-                    playerViewModel.addGold(task.getGoldReward());
-                    soundManager.playTaskComplete();
+            if (task.isCompleted() && !task.isRewardClaimed()) {
+                // ✅ Логируем выполнение в CompletedTasks
+                CompletedTask completedTask = new CompletedTask(
+                        task.getId(),
+                        task.getTitle(),
+                        task.getXpReward(),
+                        task.getGoldReward(),
+                        task.getFrequency()
+                );
+                completedTaskViewModel.insert(completedTask);
 
-                    task.setRewardClaimed(true);
-                    taskViewModel.updateTask(task);
+                // Даём награды
+                playerViewModel.addXp(task.getXpReward());
+                playerViewModel.addGold(task.getGoldReward());
+                soundManager.playTaskComplete();
 
-                    Snackbar.make(findViewById(android.R.id.content),
-                            "✅ +" + task.getXpReward() + " XP, +" + task.getGoldReward() + " Gold",
-                            Snackbar.LENGTH_SHORT).show();
-                } else {
-                    Snackbar.make(findViewById(android.R.id.content),
-                            "✅ Task completed (reward already claimed)",
-                            Snackbar.LENGTH_SHORT).show();
-                }
+                task.setRewardClaimed(true);
+                taskViewModel.updateTask(task);
+
+                Snackbar.make(findViewById(android.R.id.content),
+                        "✅ +" + task.getXpReward() + " XP, +" + task.getGoldReward() + " Gold",
+                        Snackbar.LENGTH_SHORT).show();
+            } else if (task.isCompleted()) {
+                Snackbar.make(findViewById(android.R.id.content),
+                        "✅ Task completed",
+                        Snackbar.LENGTH_SHORT).show();
             } else {
                 Snackbar.make(findViewById(android.R.id.content),
                         "Task unchecked",
                         Snackbar.LENGTH_SHORT).show();
             }
         });
+
 
         adapter.setOnTaskLongClickListener(task -> {
             TaskEditDialog editDialog = TaskEditDialog.newInstance(task);
@@ -183,6 +197,15 @@ public class MainActivity extends AppCompatActivity {
         if (btnTalents != null) {
             btnTalents.setOnClickListener(v -> {
                 Intent intent = new Intent(MainActivity.this, TalentsActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        // === STATISTICS BUTTON ===
+        Button btnStatistics = findViewById(R.id.btn_statistics);
+        if (btnStatistics != null) {
+            btnStatistics.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, StatisticsActivity.class);
                 startActivity(intent);
             });
         }
