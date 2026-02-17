@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private SoundManager soundManager;
     private LiveData<List<Task>> currentTasksLiveData;
     private CompletedTaskViewModel completedTaskViewModel;
+    private TextView tvXpPenalty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         completedTaskViewModel = new ViewModelProvider(this).get(CompletedTaskViewModel.class);
 
         playerViewModel.initializePlayerIfNeeded();
+        tvXpPenalty = findViewById(R.id.tvXpPenalty);
 
         // === RECYCLERVIEW SETUP ===
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
@@ -143,7 +146,25 @@ public class MainActivity extends AppCompatActivity {
                 );
                 completedTaskViewModel.insert(completedTask);
 
-                // Даём награды
+                Player player = playerViewModel.getPlayer().getValue();
+                int penalty = (player != null) ? player.getXpPenalty() : 0;
+
+                if (penalty > 0) {
+                    int baseXp = task.getXpReward();
+                    int actualXp = baseXp * (100 - penalty) / 100;
+                    int reduction = baseXp - actualXp;
+
+                    Snackbar.make(findViewById(android.R.id.content),
+                                    "+" + actualXp + " XP (⚠️ -" + reduction + " penalty), +" + task.getGoldReward() + " Gold",
+                                    Snackbar.LENGTH_LONG)
+                            .setBackgroundTint(getResources().getColor(android.R.color.holo_orange_dark))
+                            .show();
+                } else {
+                    Snackbar.make(findViewById(android.R.id.content),
+                            "✅ +" + task.getXpReward() + " XP, +" + task.getGoldReward() + " Gold",
+                            Snackbar.LENGTH_SHORT).show();
+                }
+
                 playerViewModel.addXp(task.getXpReward());
                 playerViewModel.addGold(task.getGoldReward());
                 soundManager.playTaskComplete();
@@ -151,9 +172,6 @@ public class MainActivity extends AppCompatActivity {
                 task.setRewardClaimed(true);
                 taskViewModel.updateTask(task);
 
-                Snackbar.make(findViewById(android.R.id.content),
-                        "✅ +" + task.getXpReward() + " XP, +" + task.getGoldReward() + " Gold",
-                        Snackbar.LENGTH_SHORT).show();
             } else if (task.isCompleted()) {
                 Snackbar.make(findViewById(android.R.id.content),
                         "✅ Task completed",
@@ -207,6 +225,17 @@ public class MainActivity extends AppCompatActivity {
             btnStatistics.setOnClickListener(v -> {
                 Intent intent = new Intent(MainActivity.this, StatisticsActivity.class);
                 startActivity(intent);
+            });
+
+            btnStatistics.setOnLongClickListener(v -> {
+                WorkManager.getInstance(this)
+                        .enqueue(new OneTimeWorkRequest.Builder(DailyResetWorker.class).build());
+
+                Toast.makeText(this,
+                        "🔧 Daily Reset triggered! Check in 3 seconds",
+                        Toast.LENGTH_LONG
+                ).show();
+                return true;
             });
         }
 
@@ -277,6 +306,8 @@ public class MainActivity extends AppCompatActivity {
             xpText.setText(player.getCurrentXp() + "/" + player.getXpToNextLevel());
         }
 
+        updatePenaltyIndicator(player.getXpPenalty());
+
         // Gold
         TextView goldText = findViewById(R.id.goldText);
         if (goldText != null) {
@@ -300,6 +331,122 @@ public class MainActivity extends AppCompatActivity {
         if (manaText != null) {
             manaText.setText("💙 Mana: " + player.getCurrentMana() + "/" + player.getMaxMana());
         }
+    }
+
+    /**
+     * ✨ NEW: Update XP Penalty warning indicator with animations
+     * @param penalty Current XP penalty percentage (0-50)
+     */
+    private void updatePenaltyIndicator(int penalty) {
+        if (tvXpPenalty == null) return;
+
+        if (penalty > 0) {
+            if (tvXpPenalty.getVisibility() == View.GONE) {
+                tvXpPenalty.setAlpha(0f);
+                tvXpPenalty.setVisibility(View.VISIBLE);
+                tvXpPenalty.animate()
+                        .alpha(1f)
+                        .setDuration(500)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                        .start();
+            }
+
+            tvXpPenalty.setText("⚠️ XP Penalty: -" + penalty + "%");
+
+            int color;
+            if (penalty >= 30) {
+                color = getResources().getColor(android.R.color.holo_red_dark);
+                stopPulsatingAnimation(tvXpPenalty);
+                startPulsatingAnimation(tvXpPenalty);
+            } else if (penalty >= 15) {
+                color = getResources().getColor(android.R.color.holo_orange_dark);
+                stopPulsatingAnimation(tvXpPenalty);
+            } else {
+                color = 0xFFFF5252;
+                stopPulsatingAnimation(tvXpPenalty);
+            }
+            tvXpPenalty.setTextColor(color);
+
+            tvXpPenalty.setOnClickListener(v -> {
+                new AlertDialog.Builder(this)
+                        .setTitle("⚠️ XP Penalty Active")
+                        .setMessage(getPenaltyMessage(penalty))
+                        .setPositiveButton("Got it!", null)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            });
+
+        } else {
+            stopPulsatingAnimation(tvXpPenalty);
+
+            if (tvXpPenalty.getVisibility() == View.VISIBLE) {
+                tvXpPenalty.animate()
+                        .alpha(0f)
+                        .setDuration(500)
+                        .setInterpolator(new android.view.animation.AccelerateInterpolator())
+                        .withEndAction(() -> {
+                            tvXpPenalty.setVisibility(View.GONE);
+                            tvXpPenalty.setAlpha(1f);
+                        })
+                        .start();
+            }
+            tvXpPenalty.setOnClickListener(null);
+        }
+    }
+
+    /**
+     * ✨ NEW: Generate penalty explanation message
+     */
+    private String getPenaltyMessage(int penalty) {
+        int uncompletedTasks = penalty / 5;
+
+        String severity;
+        if (penalty >= 30) {
+            severity = "🔴 SEVERE";
+        } else if (penalty >= 15) {
+            severity = "🟠 MODERATE";
+        } else {
+            severity = "🟡 MINOR";
+        }
+
+        return "Your XP rewards are reduced by " + penalty + "%!\n\n" +
+                "📉 Penalty Level: " + severity + "\n" +
+                "❌ Uncompleted daily tasks: " + uncompletedTasks + "\n\n" +
+                "💡 How to remove penalty:\n" +
+                "Complete ALL daily tasks before midnight to reset penalty to 0%.\n\n" +
+                "🎯 Current effect:\n" +
+                "• 100 XP task → " + (100 - penalty) + " XP\n" +
+                "• 50 XP task → " + (50 * (100 - penalty) / 100) + " XP";
+    }
+
+    /**
+     * ✨ NEW: Start pulsating animation for high penalty warnings
+     */
+    private void startPulsatingAnimation(TextView view) {
+        android.animation.ObjectAnimator pulse = android.animation.ObjectAnimator.ofFloat(
+                view,
+                "alpha",
+                1f, 0.4f, 1f
+        );
+        pulse.setDuration(2000);
+        pulse.setRepeatCount(android.animation.ObjectAnimator.INFINITE);
+        pulse.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
+        pulse.start();
+
+        // Store animator to stop it later
+        view.setTag(R.id.tvXpPenalty, pulse);
+    }
+
+    /**
+     * ✨ NEW: Stop pulsating animation
+     */
+    private void stopPulsatingAnimation(TextView view) {
+        Object animator = view.getTag(R.id.tvXpPenalty);
+        if (animator instanceof android.animation.ObjectAnimator) {
+            ((android.animation.ObjectAnimator) animator).cancel();
+            view.setTag(R.id.tvXpPenalty, null);
+        }
+        view.setAlpha(1f);
     }
 
     private void showLevelUpDialog(LevelUpEvent event) {
@@ -477,6 +624,9 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         if (soundManager != null) {
             soundManager.release();
+        }
+        if (tvXpPenalty != null) {
+            stopPulsatingAnimation(tvXpPenalty);
         }
     }
 }

@@ -32,7 +32,7 @@ public class PlayerViewModel extends AndroidViewModel {
         repository.updatePlayer(player);
     }
 
-    public void addXp(long xp) {
+    public void addXp(int xp) {
         repository.addXp(xp);
     }
 
