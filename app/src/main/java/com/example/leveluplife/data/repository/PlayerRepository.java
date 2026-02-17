@@ -1,6 +1,7 @@
 package com.example.leveluplife.data.repository;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -14,6 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PlayerRepository {
+    private static final String TAG = "PlayerRepository";
+
     private static PlayerRepository instance;
     private final PlayerDao playerDao;
     private final LiveData<Player> player;
@@ -61,109 +64,118 @@ public class PlayerRepository {
         });
     }
 
-    public void addXp(long amount) {
+    public void addXp(int baseXp) {
         executor.execute(() -> {
-            Player player = playerDao.getPlayerSync();
-            if (player != null) {
-                long newXp = player.getCurrentXp() + amount;
-                long xpToNextLevel = player.getXpToNextLevel();
+            Player currentPlayer = playerDao.getPlayerSync();
+            if (currentPlayer != null) {
+                int penalty = currentPlayer.getXpPenalty();
+                int actualXp = baseXp * (100 - penalty) / 100;
 
-                while (newXp >= xpToNextLevel) {
-                    newXp -= xpToNextLevel;
-                    player.setLevel(player.getLevel() + 1);
-                    xpToNextLevel = calculateXpForNextLevel(player.getLevel());
-                    player.setXpToNextLevel(xpToNextLevel);
-                    player.setTalentPoints(player.getTalentPoints() + 1);
-
-                    player.setMaxHp(player.getMaxHp() + 10);
-                    player.setCurrentHp(player.getMaxHp());
-                    player.setMaxMana(player.getMaxMana() + 5);
-                    player.setCurrentMana(player.getMaxMana());
-
-                    player.setStrength(player.getStrength() + 1);
-                    player.setIntelligence(player.getIntelligence() + 1);
-                    player.setDexterity(player.getDexterity() + 1);
-
-                    levelUpEvent.postValue(new LevelUpEvent(
-                            player.getLevel(),
-                            player.getMaxHp(),
-                            player.getMaxMana(),
-                            player.getStrength(),
-                            player.getIntelligence(),
-                            player.getDexterity()
-                    ));
+                Log.d(TAG, "💰 XP Reward:");
+                Log.d(TAG, "   Base XP: " + baseXp);
+                if (penalty > 0) {
+                    Log.d(TAG, "   ⚠️ Penalty: -" + penalty + "%");
+                    Log.d(TAG, "   Actual XP: " + actualXp + " (reduced by " + (baseXp - actualXp) + ")");
+                } else {
+                    Log.d(TAG, "   Actual XP: " + actualXp);
                 }
 
-                player.setCurrentXp(newXp);
-                playerDao.updatePlayer(player);
+                currentPlayer.setCurrentXp(currentPlayer.getCurrentXp() + actualXp);
+
+                while (currentPlayer.getCurrentXp() >= currentPlayer.getXpToNextLevel()) {
+                    int oldMaxHp = currentPlayer.getMaxHp();
+                    int oldMaxMana = currentPlayer.getMaxMana();
+
+                    currentPlayer.setCurrentXp(currentPlayer.getCurrentXp() - currentPlayer.getXpToNextLevel());
+                    currentPlayer.setLevel(currentPlayer.getLevel() + 1);
+                    currentPlayer.setXpToNextLevel((int) (currentPlayer.getXpToNextLevel() * 1.5));
+                    currentPlayer.setMaxHp(currentPlayer.getMaxHp() + 10);
+                    currentPlayer.setMaxMana(currentPlayer.getMaxMana() + 5);
+                    currentPlayer.setTalentPoints(currentPlayer.getTalentPoints() + 1);
+
+                    Log.d(TAG, "🎊 LEVEL UP! New level: " + currentPlayer.getLevel());
+
+                    LevelUpEvent event = new LevelUpEvent(
+                            currentPlayer.getLevel(),
+                            currentPlayer.getTalentPoints(),
+                            oldMaxHp,
+                            currentPlayer.getMaxHp(),
+                            oldMaxMana,
+                            currentPlayer.getMaxMana()
+                    );
+                    levelUpEvent.postValue(event);
+                }
+
+                // Update database
+                playerDao.updatePlayer(currentPlayer);
             }
         });
     }
 
     public void subtractXp(long xp) {
         executor.execute(() -> {
-            Player player = playerDao.getPlayerSync();
-            if (player != null) {
-                long newXp = Math.max(0, player.getCurrentXp() - xp);
-                player.setCurrentXp(newXp);
-                playerDao.updatePlayer(player);
+            Player currentPlayer = playerDao.getPlayerSync();
+            if (currentPlayer != null) {
+                long newXp = Math.max(0, currentPlayer.getCurrentXp() - xp);
+                currentPlayer.setCurrentXp(newXp);
+                playerDao.updatePlayer(currentPlayer);
             }
         });
     }
 
     public void addGold(int amount) {
         executor.execute(() -> {
-            Player player = playerDao.getPlayerSync();
-            if (player != null) {
-                player.setGold(player.getGold() + amount);
-                playerDao.updatePlayer(player);
+            Player currentPlayer = playerDao.getPlayerSync();
+            if (currentPlayer != null) {
+                currentPlayer.setGold(currentPlayer.getGold() + amount);
+                playerDao.updatePlayer(currentPlayer);
             }
         });
     }
 
     public void subtractGold(int amount) {
         executor.execute(() -> {
-            Player player = playerDao.getPlayerSync();
-            if (player != null) {
-                int newGold = Math.max(0, player.getGold() - amount);
-                player.setGold(newGold);
-                playerDao.updatePlayer(player);
+            Player currentPlayer = playerDao.getPlayerSync();
+            if (currentPlayer != null) {
+                int newGold = Math.max(0, currentPlayer.getGold() - amount);
+                currentPlayer.setGold(newGold);
+                playerDao.updatePlayer(currentPlayer);
             }
         });
     }
 
     public void removeXp(int amount) {
         executor.execute(() -> {
-            Player player = playerDao.getPlayerSync();
-            if (player != null) {
-                int newXp = (int) (player.getCurrentXp() - amount);
+            Player currentPlayer = playerDao.getPlayerSync();
+            if (currentPlayer != null) {
+                int newXp = (int) (currentPlayer.getCurrentXp() - amount);
                 if (newXp < 0) newXp = 0;
 
-                player.setCurrentXp(newXp);
-                playerDao.updatePlayer(player);
+                currentPlayer.setCurrentXp(newXp);
+                playerDao.updatePlayer(currentPlayer);
             }
         });
     }
 
     public void removeGold(int amount) {
         executor.execute(() -> {
-            Player player = playerDao.getPlayerSync();
-            if (player != null) {
-                int newGold = player.getGold() - amount;
+            Player currentPlayer = playerDao.getPlayerSync();
+            if (currentPlayer != null) {
+                int newGold = currentPlayer.getGold() - amount;
                 if (newGold < 0) newGold = 0;
 
-                player.setGold(newGold);
-                playerDao.updatePlayer(player);
+                currentPlayer.setGold(newGold);
+                playerDao.updatePlayer(currentPlayer);
             }
         });
     }
 
     public void addGems(int amount) {
         executor.execute(() -> {
-            Player player = playerDao.getPlayerSync();
-            if (player != null) {
-                player.setGems(player.getGems() + amount);
-                playerDao.updatePlayer(player);
+            Player currentPlayer = playerDao.getPlayerSync();
+            if (currentPlayer != null) {
+                currentPlayer.setGems(currentPlayer.getGems() + amount);
+                playerDao.updatePlayer(currentPlayer);
             }
         });
     }

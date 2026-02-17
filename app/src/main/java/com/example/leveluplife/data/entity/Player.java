@@ -24,6 +24,8 @@ public class Player {
     private int dexterity;
     private int talentPoints;
 
+    private int xpPenalty;
+
     public Player() {
         this.level = 1;
         this.currentXp = 0;
@@ -40,6 +42,8 @@ public class Player {
         this.intelligence = 5;
         this.dexterity = 5;
         this.talentPoints = 0;
+
+        this.xpPenalty = 0;
     }
 
     public int getId() {
@@ -152,5 +156,13 @@ public class Player {
 
     public void setTalentPoints(int talentPoints) {
         this.talentPoints = talentPoints;
+    }
+
+    public int getXpPenalty() {
+        return xpPenalty;
+    }
+
+    public void setXpPenalty(int xpPenalty) {
+        this.xpPenalty = Math.min(xpPenalty, 50);
     }
 }
