@@ -34,6 +34,7 @@ import com.example.leveluplife.viewModel.CompletedTaskViewModel;
 import com.example.leveluplife.viewModel.PlayerViewModel;
 import com.example.leveluplife.viewModel.TaskViewModel;
 import com.example.leveluplife.workers.DailyResetWorker;
+import com.example.leveluplife.workers.ReminderWorker;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -66,7 +67,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        requestNotificationPermission();
         scheduleDailyReset();
+        scheduleReminderChecker();
 
         // === SOUND MANAGER INITIALIZATION ===
         soundManager = SoundManager.getInstance(this);
@@ -86,12 +89,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         ChipGroup chipGroupFilters = findViewById(R.id.chipGroupFilters);
-
         chipGroupFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
             if (!checkedIds.isEmpty()) {
                 int checkedId = checkedIds.get(0);
                 String filter;
-
                 if (checkedId == R.id.chipAll) {
                     filter = "ALL";
                 } else if (checkedId == R.id.chipDaily) {
@@ -103,20 +104,15 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     filter = "ALL";
                 }
-
                 applyFilter(filter);
             }
         });
 
         currentTasksLiveData = taskViewModel.getAllTasks();
-        currentTasksLiveData.observe(this, tasks -> {
-            adapter.setTasks(tasks);
-        });
+        currentTasksLiveData.observe(this, tasks -> adapter.setTasks(tasks));
 
         playerViewModel.getPlayer().observe(this, player -> {
-            if (player != null) {
-                updatePlayerUI(player);
-            }
+            if (player != null) updatePlayerUI(player);
         });
 
         playerViewModel.getLevelUpEvent().observe(this, event -> {
@@ -136,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
             adapter.notifyItemChanged(position);
 
             if (task.isCompleted() && !task.isRewardClaimed()) {
-                // ✅ Логируем выполнение в CompletedTasks
                 CompletedTask completedTask = new CompletedTask(
                         task.getId(),
                         task.getTitle(),
@@ -153,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
                     int baseXp = task.getXpReward();
                     int actualXp = baseXp * (100 - penalty) / 100;
                     int reduction = baseXp - actualXp;
-
                     Snackbar.make(findViewById(android.R.id.content),
                                     "+" + actualXp + " XP (⚠️ -" + reduction + " penalty), +" + task.getGoldReward() + " Gold",
                                     Snackbar.LENGTH_LONG)
@@ -174,15 +168,12 @@ public class MainActivity extends AppCompatActivity {
 
             } else if (task.isCompleted()) {
                 Snackbar.make(findViewById(android.R.id.content),
-                        "✅ Task completed",
-                        Snackbar.LENGTH_SHORT).show();
+                        "✅ Task completed", Snackbar.LENGTH_SHORT).show();
             } else {
                 Snackbar.make(findViewById(android.R.id.content),
-                        "Task unchecked",
-                        Snackbar.LENGTH_SHORT).show();
+                        "Task unchecked", Snackbar.LENGTH_SHORT).show();
             }
         });
-
 
         adapter.setOnTaskLongClickListener(task -> {
             TaskEditDialog editDialog = TaskEditDialog.newInstance(task);
@@ -195,18 +186,13 @@ public class MainActivity extends AppCompatActivity {
 
         // === FAB (CREATE TASK) ===
         FloatingActionButton fabAddTask = findViewById(R.id.fabAddTask);
-
-        fabAddTask.postDelayed(() -> {
-            fabAddTask.startAnimation(android.view.animation.AnimationUtils.loadAnimation(
-                    this, R.anim.bounce
-            ));
-        }, 500);
+        fabAddTask.postDelayed(() ->
+                fabAddTask.startAnimation(android.view.animation.AnimationUtils.loadAnimation(this, R.anim.bounce)
+                ), 500);
 
         fabAddTask.setOnClickListener(v -> {
             TaskCreationDialog dialog = new TaskCreationDialog();
-            dialog.setOnTaskCreatedListener(task -> {
-                taskViewModel.insertTask(task);
-            });
+            dialog.setOnTaskCreatedListener(task -> taskViewModel.insertTask(task));
             dialog.show(getSupportFragmentManager(), "TaskCreationDialog");
         });
 
@@ -216,6 +202,15 @@ public class MainActivity extends AppCompatActivity {
             btnTalents.setOnClickListener(v -> {
                 Intent intent = new Intent(MainActivity.this, TalentsActivity.class);
                 startActivity(intent);
+            });
+
+            btnTalents.setOnLongClickListener(v -> {
+                WorkManager.getInstance(this)
+                        .enqueue(new OneTimeWorkRequest.Builder(ReminderWorker.class).build());
+                Toast.makeText(this,
+                        "🔔 ReminderWorker запущен! Logcat → tag:ReminderWorker",
+                        Toast.LENGTH_LONG).show();
+                return true;
             });
         }
 
@@ -230,11 +225,9 @@ public class MainActivity extends AppCompatActivity {
             btnStatistics.setOnLongClickListener(v -> {
                 WorkManager.getInstance(this)
                         .enqueue(new OneTimeWorkRequest.Builder(DailyResetWorker.class).build());
-
                 Toast.makeText(this,
                         "🔧 Daily Reset triggered! Check in 3 seconds",
-                        Toast.LENGTH_LONG
-                ).show();
+                        Toast.LENGTH_LONG).show();
                 return true;
             });
         }
@@ -242,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
         // === SWIPE TO DELETE ===
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-
                     @Override
                     public boolean onMove(@NonNull RecyclerView recyclerView,
                                           @NonNull RecyclerView.ViewHolder viewHolder,
@@ -254,15 +246,12 @@ public class MainActivity extends AppCompatActivity {
                     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                         int position = viewHolder.getAdapterPosition();
                         Task deletedTask = adapter.getTaskAt(position);
-
                         soundManager.playSwipeDelete();
-
                         taskViewModel.deleteTask(deletedTask);
 
                         Snackbar.make(recyclerView, "Task deleted", Snackbar.LENGTH_LONG)
                                 .setAction("UNDO", v -> {
                                     taskViewModel.insertTask(deletedTask);
-
                                     if (deletedTask.isCompleted()) {
                                         playerViewModel.addXp(deletedTask.getXpReward());
                                         playerViewModel.addGold(deletedTask.getGoldReward());
@@ -274,69 +263,82 @@ public class MainActivity extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
-    private void updatePlayerUI(Player player) {
-        // Level
-        TextView playerLevelText = findViewById(R.id.playerLevelText);
-        if (playerLevelText != null) {
-            playerLevelText.setText("Level " + player.getLevel());
-        }
+    private void scheduleDailyReset() {
+        long delayToMidnight = calculateDelayToMidnight();
+        PeriodicWorkRequest resetWork = new PeriodicWorkRequest.Builder(
+                DailyResetWorker.class, 1, TimeUnit.DAYS)
+                .setInitialDelay(delayToMidnight, TimeUnit.MILLISECONDS)
+                .build();
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "daily_reset", ExistingPeriodicWorkPolicy.KEEP, resetWork);
+        Log.d(TAG, "Daily reset scheduled in " + (delayToMidnight / 1000 / 60) + " min");
+    }
 
-        // XP Progress Bar
+    private void scheduleReminderChecker() {
+        PeriodicWorkRequest reminderWork = new PeriodicWorkRequest.Builder(
+                ReminderWorker.class, 15, TimeUnit.MINUTES)
+                .build();
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "reminder_checker", ExistingPeriodicWorkPolicy.KEEP, reminderWork);
+        Log.d(TAG, "✅ ReminderChecker scheduled (every 15 min)");
+    }
+
+    private void requestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+                        1001
+                );
+            }
+        }
+    }
+
+    private long calculateDelayToMidnight() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        return calendar.getTimeInMillis() - System.currentTimeMillis();
+    }
+
+
+    private void updatePlayerUI(Player player) {
+        TextView playerLevelText = findViewById(R.id.playerLevelText);
+        if (playerLevelText != null) playerLevelText.setText("Level " + player.getLevel());
+
         ProgressBar xpProgressBar = findViewById(R.id.xpProgressBar);
         if (xpProgressBar != null) {
             int oldProgress = xpProgressBar.getProgress();
-            int newProgress = (int) player.getCurrentXp();
-
             xpProgressBar.setMax((int) player.getXpToNextLevel());
-
             android.animation.ObjectAnimator animator = android.animation.ObjectAnimator.ofInt(
-                    xpProgressBar,
-                    "progress",
-                    oldProgress,
-                    newProgress
-            );
+                    xpProgressBar, "progress", oldProgress, (int) player.getCurrentXp());
             animator.setDuration(800);
             animator.setInterpolator(new android.view.animation.DecelerateInterpolator());
             animator.start();
         }
 
-        // XP Text
         TextView xpText = findViewById(R.id.xpText);
-        if (xpText != null) {
-            xpText.setText(player.getCurrentXp() + "/" + player.getXpToNextLevel());
-        }
+        if (xpText != null) xpText.setText(player.getCurrentXp() + "/" + player.getXpToNextLevel());
 
         updatePenaltyIndicator(player.getXpPenalty());
 
-        // Gold
         TextView goldText = findViewById(R.id.goldText);
-        if (goldText != null) {
-            goldText.setText("💰 Gold: " + player.getGold());
-        }
+        if (goldText != null) goldText.setText("💰 Gold: " + player.getGold());
 
-        // Gems
         TextView gemsText = findViewById(R.id.gemsText);
-        if (gemsText != null) {
-            gemsText.setText("💎 Gems: " + player.getGems());
-        }
+        if (gemsText != null) gemsText.setText("💎 Gems: " + player.getGems());
 
-        // HP
         TextView hpText = findViewById(R.id.hpText);
-        if (hpText != null) {
-            hpText.setText("❤️ HP: " + player.getCurrentHp() + "/" + player.getMaxHp());
-        }
+        if (hpText != null) hpText.setText("❤️ HP: " + player.getCurrentHp() + "/" + player.getMaxHp());
 
-        // Mana
         TextView manaText = findViewById(R.id.manaText);
-        if (manaText != null) {
-            manaText.setText("💙 Mana: " + player.getCurrentMana() + "/" + player.getMaxMana());
-        }
+        if (manaText != null) manaText.setText("💙 Mana: " + player.getCurrentMana() + "/" + player.getMaxMana());
     }
 
-    /**
-     * ✨ NEW: Update XP Penalty warning indicator with animations
-     * @param penalty Current XP penalty percentage (0-50)
-     */
     private void updatePenaltyIndicator(int penalty) {
         if (tvXpPenalty == null) return;
 
@@ -344,13 +346,9 @@ public class MainActivity extends AppCompatActivity {
             if (tvXpPenalty.getVisibility() == View.GONE) {
                 tvXpPenalty.setAlpha(0f);
                 tvXpPenalty.setVisibility(View.VISIBLE);
-                tvXpPenalty.animate()
-                        .alpha(1f)
-                        .setDuration(500)
-                        .setInterpolator(new android.view.animation.DecelerateInterpolator())
-                        .start();
+                tvXpPenalty.animate().alpha(1f).setDuration(500)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
             }
-
             tvXpPenalty.setText("⚠️ XP Penalty: -" + penalty + "%");
 
             int color;
@@ -366,49 +364,31 @@ public class MainActivity extends AppCompatActivity {
                 stopPulsatingAnimation(tvXpPenalty);
             }
             tvXpPenalty.setTextColor(color);
-
-            tvXpPenalty.setOnClickListener(v -> {
-                new AlertDialog.Builder(this)
-                        .setTitle("⚠️ XP Penalty Active")
-                        .setMessage(getPenaltyMessage(penalty))
-                        .setPositiveButton("Got it!", null)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
-            });
-
+            tvXpPenalty.setOnClickListener(v ->
+                    new AlertDialog.Builder(this)
+                            .setTitle("⚠️ XP Penalty Active")
+                            .setMessage(getPenaltyMessage(penalty))
+                            .setPositiveButton("Got it!", null)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show()
+            );
         } else {
             stopPulsatingAnimation(tvXpPenalty);
-
             if (tvXpPenalty.getVisibility() == View.VISIBLE) {
-                tvXpPenalty.animate()
-                        .alpha(0f)
-                        .setDuration(500)
+                tvXpPenalty.animate().alpha(0f).setDuration(500)
                         .setInterpolator(new android.view.animation.AccelerateInterpolator())
                         .withEndAction(() -> {
                             tvXpPenalty.setVisibility(View.GONE);
                             tvXpPenalty.setAlpha(1f);
-                        })
-                        .start();
+                        }).start();
             }
             tvXpPenalty.setOnClickListener(null);
         }
     }
 
-    /**
-     * ✨ NEW: Generate penalty explanation message
-     */
     private String getPenaltyMessage(int penalty) {
         int uncompletedTasks = penalty / 5;
-
-        String severity;
-        if (penalty >= 30) {
-            severity = "🔴 SEVERE";
-        } else if (penalty >= 15) {
-            severity = "🟠 MODERATE";
-        } else {
-            severity = "🟡 MINOR";
-        }
-
+        String severity = penalty >= 30 ? "🔴 SEVERE" : penalty >= 15 ? "🟠 MODERATE" : "🟡 MINOR";
         return "Your XP rewards are reduced by " + penalty + "%!\n\n" +
                 "📉 Penalty Level: " + severity + "\n" +
                 "❌ Uncompleted daily tasks: " + uncompletedTasks + "\n\n" +
@@ -419,27 +399,16 @@ public class MainActivity extends AppCompatActivity {
                 "• 50 XP task → " + (50 * (100 - penalty) / 100) + " XP";
     }
 
-    /**
-     * ✨ NEW: Start pulsating animation for high penalty warnings
-     */
     private void startPulsatingAnimation(TextView view) {
         android.animation.ObjectAnimator pulse = android.animation.ObjectAnimator.ofFloat(
-                view,
-                "alpha",
-                1f, 0.4f, 1f
-        );
+                view, "alpha", 1f, 0.4f, 1f);
         pulse.setDuration(2000);
         pulse.setRepeatCount(android.animation.ObjectAnimator.INFINITE);
         pulse.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
         pulse.start();
-
-        // Store animator to stop it later
         view.setTag(R.id.tvXpPenalty, pulse);
     }
 
-    /**
-     * ✨ NEW: Stop pulsating animation
-     */
     private void stopPulsatingAnimation(TextView view) {
         Object animator = view.getTag(R.id.tvXpPenalty);
         if (animator instanceof android.animation.ObjectAnimator) {
@@ -449,13 +418,9 @@ public class MainActivity extends AppCompatActivity {
         view.setAlpha(1f);
     }
 
-    private void showLevelUpDialog(LevelUpEvent event) {
-        Log.d(TAG, "showLevelUpDialog called! Creating dialog for Level " + event.newLevel);
 
-        int level = event.newLevel;
-        int talentPoints = event.talentPoints;
-        int hpGained = event.getHpGain();
-        int manaGained = event.getManaGain();
+    private void showLevelUpDialog(LevelUpEvent event) {
+        Log.d(TAG, "showLevelUpDialog called! Level " + event.newLevel);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_level_up, null);
@@ -468,21 +433,12 @@ public class MainActivity extends AppCompatActivity {
         Button btnAwesome = dialogView.findViewById(R.id.btn_awesome);
         KonfettiView konfettiView = dialogView.findViewById(R.id.konfettiView);
 
-        if (tvLevelUp != null) {
-            tvLevelUp.setText("🎉 LEVEL UP! 🎉");
-        }
-        if (tvLevelNumber != null) {
-            tvLevelNumber.setText("You reached Level " + level + "!");
-        }
-        if (tvTalentPoints != null) {
-            tvTalentPoints.setText("⭐ +" + talentPoints + " Talent Point" + (talentPoints > 1 ? "s" : ""));
-        }
-        if (tvMaxHp != null) {
-            tvMaxHp.setText("❤️ Max HP +" + hpGained);
-        }
-        if (tvMaxMana != null) {
-            tvMaxMana.setText("💙 Max Mana +" + manaGained);
-        }
+        if (tvLevelUp != null)      tvLevelUp.setText("🎉 LEVEL UP! 🎉");
+        if (tvLevelNumber != null)  tvLevelNumber.setText("You reached Level " + event.newLevel + "!");
+        if (tvTalentPoints != null) tvTalentPoints.setText("⭐ +" + event.talentPoints +
+                " Talent Point" + (event.talentPoints > 1 ? "s" : ""));
+        if (tvMaxHp != null)        tvMaxHp.setText("❤️ Max HP +" + event.getHpGain());
+        if (tvMaxMana != null)      tvMaxMana.setText("💙 Max Mana +" + event.getManaGain());
 
         builder.setView(dialogView);
         AlertDialog dialog = builder.create();
@@ -492,120 +448,35 @@ public class MainActivity extends AppCompatActivity {
             dialog.getWindow().getAttributes().windowAnimations = R.style.LevelUpDialogAnimation;
         }
 
-        if (btnAwesome != null) {
-            btnAwesome.setOnClickListener(v -> dialog.dismiss());
-        }
-
+        if (btnAwesome != null) btnAwesome.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
 
         if (tvLevelUp != null) {
-            tvLevelUp.startAnimation(android.view.animation.AnimationUtils.loadAnimation(
-                    this, R.anim.bounce
-            ));
+            tvLevelUp.startAnimation(
+                    android.view.animation.AnimationUtils.loadAnimation(this, R.anim.bounce));
         }
-
-        if (konfettiView != null) {
-            startConfetti(konfettiView);
-        }
+        if (konfettiView != null) startConfetti(konfettiView);
     }
 
     private void startConfetti(KonfettiView konfettiView) {
         List<Integer> colors = Arrays.asList(
-                0xFFFFD700,
-                0xFFBB86FC,
-                0xFFFF5252,
-                0xFF448AFF,
-                0xFFFFEB3B
-        );
+                0xFFFFD700, 0xFFBB86FC, 0xFFFF5252, 0xFF448AFF, 0xFFFFEB3B);
+        List<Shape> shapes = Arrays.asList(Shape.Square.INSTANCE, Shape.Circle.INSTANCE);
 
-        List<Shape> shapes = Arrays.asList(
-                Shape.Square.INSTANCE,
-                Shape.Circle.INSTANCE
-        );
-
-        Party partyLeft = new PartyFactory(
-                new Emitter(200L, TimeUnit.MILLISECONDS).max(50)
-        )
-                .angle(315)
-                .spread(45)
+        Party party = new PartyFactory(new Emitter(200L, TimeUnit.MILLISECONDS).max(50))
+                .angle(270).spread(60)
                 .setSpeedBetween(30f, 60f)
                 .timeToLive(3000L)
                 .fadeOutEnabled(true)
-                .shapes(shapes)
-                .colors(colors)
-                .position(new Position.Relative(0.5, 0.5))
+                .shapes(shapes).colors(colors)
+                .position(new Position.Relative(0.5, 0.0))
                 .build();
 
-        Party partyRight = new PartyFactory(
-                new Emitter(200L, TimeUnit.MILLISECONDS).max(50)
-        )
-                .angle(225)
-                .spread(45)
-                .setSpeedBetween(30f, 60f)
-                .timeToLive(3000L)
-                .fadeOutEnabled(true)
-                .shapes(shapes)
-                .colors(colors)
-                .position(new Position.Relative(0.5, 0.5))
-                .build();
-
-        Party partyCenter = new PartyFactory(
-                new Emitter(150L, TimeUnit.MILLISECONDS).max(40)
-        )
-                .angle(270)
-                .spread(30)
-                .setSpeedBetween(40f, 70f)
-                .timeToLive(3000L)
-                .fadeOutEnabled(true)
-                .shapes(shapes)
-                .colors(colors)
-                .position(new Position.Relative(0.5, 0.5))
-                .build();
-
-        konfettiView.start(partyLeft, partyRight, partyCenter);
-
-        new android.os.Handler().postDelayed(() -> {
-            konfettiView.start(partyLeft, partyRight, partyCenter);
-        }, 100);
-    }
-
-    private void scheduleDailyReset() {
-        long delayToMidnight = calculateDelayToMidnight();
-
-        PeriodicWorkRequest resetWork = new PeriodicWorkRequest.Builder(
-                DailyResetWorker.class,
-                1, TimeUnit.DAYS
-        )
-                .setInitialDelay(delayToMidnight, TimeUnit.MILLISECONDS)
-                .build();
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                "daily_reset",
-                ExistingPeriodicWorkPolicy.KEEP,
-                resetWork
-        );
-
-        Log.d(TAG, "Daily reset scheduled. Next run in " + (delayToMidnight / 1000 / 60) + " minutes");
-    }
-
-    private long calculateDelayToMidnight() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
-
-        long midnight = calendar.getTimeInMillis();
-        long now = System.currentTimeMillis();
-
-        return midnight - now;
+        konfettiView.start(party);
     }
 
     private void applyFilter(String filter) {
-        if (currentTasksLiveData != null) {
-            currentTasksLiveData.removeObservers(this);
-        }
+        if (currentTasksLiveData != null) currentTasksLiveData.removeObservers(this);
 
         if (filter.equals("ALL")) {
             currentTasksLiveData = taskViewModel.getAllTasks();
@@ -613,20 +484,13 @@ public class MainActivity extends AppCompatActivity {
             taskViewModel.setFilter(filter);
             currentTasksLiveData = taskViewModel.getFilteredTasks();
         }
-
-        currentTasksLiveData.observe(this, tasks -> {
-            adapter.setTasks(tasks);
-        });
+        currentTasksLiveData.observe(this, tasks -> adapter.setTasks(tasks));
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (soundManager != null) {
-            soundManager.release();
-        }
-        if (tvXpPenalty != null) {
-            stopPulsatingAnimation(tvXpPenalty);
-        }
+        if (soundManager != null) soundManager.release();
+        if (tvXpPenalty != null) stopPulsatingAnimation(tvXpPenalty);
     }
 }
