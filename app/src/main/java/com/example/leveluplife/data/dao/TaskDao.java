@@ -52,4 +52,13 @@ public interface TaskDao {
 
     @Query("SELECT * FROM tasks WHERE frequency = :frequency")
     List<Task> getTasksByFrequencySync(String frequency);
+
+    @Query("SELECT * FROM tasks WHERE reminderEnabled = 1 AND nextReminderTime <= :currentTime ORDER BY nextReminderTime ASC")
+    List<Task> getDueReminders(long currentTime);
+
+    @Query("UPDATE tasks SET reminderEnabled = :enabled, reminderHour = :hour, reminderMinute = :minute WHERE id = :taskId")
+    void updateReminderSettings(int taskId, boolean enabled, int hour, int minute);
+
+    @Query("UPDATE tasks SET nextReminderTime = :nextTime WHERE id = :taskId")
+    void updateNextReminderTime(int taskId, long nextTime);
 }

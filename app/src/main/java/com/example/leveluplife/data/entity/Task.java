@@ -24,6 +24,11 @@ public class Task {
     private int totalCompletions;
     private boolean rewardClaimed;
 
+    private boolean reminderEnabled;
+    private int reminderHour;
+    private int reminderMinute;
+    private long nextReminderTime;
+
     public enum TaskType {
         DAILY,
         TODO,
@@ -51,6 +56,11 @@ public class Task {
         this.bestStreak = 0;
         this.lastCompletedDate = 0;
         this.totalCompletions = 0;
+
+        this.reminderEnabled = false;
+        this.reminderHour = 9;
+        this.reminderMinute = 0;
+        this.nextReminderTime = 0;
     }
 
     public int getId() {
@@ -163,5 +173,37 @@ public class Task {
 
     public void setTotalCompletions(int totalCompletions) {
         this.totalCompletions = totalCompletions;
+    }
+
+    public boolean isReminderEnabled() {
+        return reminderEnabled;
+    }
+
+    public void setReminderEnabled(boolean reminderEnabled) {
+        this.reminderEnabled = reminderEnabled;
+    }
+
+    public int getReminderHour() {
+        return reminderHour;
+    }
+
+    public void setReminderHour(int reminderHour) {
+        this.reminderHour = Math.max(0, Math.min(23, reminderHour));
+    }
+
+    public int getReminderMinute() {
+        return reminderMinute;
+    }
+
+    public void setReminderMinute(int reminderMinute) {
+        this.reminderMinute = Math.max(0, Math.min(59, reminderMinute));
+    }
+
+    public long getNextReminderTime() {
+        return nextReminderTime;
+    }
+
+    public void setNextReminderTime(long nextReminderTime) {
+        this.nextReminderTime = nextReminderTime;
     }
 }

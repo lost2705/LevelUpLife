@@ -112,7 +112,75 @@
             android:inputType="number"
             android:hint="10"
             android:textColorHint="#666666"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="16dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="16dp"
+            android:background="#2A2A2A"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="⏰ Reminder"
+                android:textColor="#BB86FC"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchEditReminder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutEditReminderTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp"
+            android:background="#2C2C2C"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Remind at:"
+                android:textColor="#CCCCCC"
+                android:textSize="14sp"/>
+
+            <NumberPicker
+                android:id="@+id/pickerEditHour"
+                android:layout_width="72dp"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" : "
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <NumberPicker
+                android:id="@+id/pickerEditMinute"
+                android:layout_width="72dp"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -143,6 +211,7 @@
                 android:textStyle="bold"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"/>
+
         </LinearLayout>
 
     </LinearLayout>
