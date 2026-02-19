@@ -26,4 +26,11 @@ public interface CompletedTaskDao {
 
     @Query("DELETE FROM completed_tasks WHERE completedAt < :beforeDate")
     void deleteOldCompletedTasks(long beforeDate);
+
+    @Query("SELECT COUNT(*) FROM completed_tasks")
+    int getTotalCompletedCount();
+
+    @Query("SELECT COUNT(*) FROM completed_tasks WHERE frequency = 'DAILY'")
+    int getDailyCompletedCount();
+
 }

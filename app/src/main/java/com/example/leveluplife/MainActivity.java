@@ -2,8 +2,12 @@ package com.example.leveluplife;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -22,6 +26,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.example.leveluplife.data.entity.Achievement;
 import com.example.leveluplife.data.entity.CompletedTask;
 import com.example.leveluplife.data.entity.Player;
 import com.example.leveluplife.data.entity.Task;
@@ -122,6 +127,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        playerViewModel.getAchievementUnlockEvent().observe(this, achievement -> {
+            if (achievement != null) {
+                showAchievementUnlockedDialog(achievement);
+            }
+        });
+
         // === TASK COMPLETION TOGGLE ===
         adapter.setOnTaskClickListener((task, position) -> {
             boolean wasCompleted = task.isCompleted();
@@ -194,6 +205,13 @@ public class MainActivity extends AppCompatActivity {
             TaskCreationDialog dialog = new TaskCreationDialog();
             dialog.setOnTaskCreatedListener(task -> taskViewModel.insertTask(task));
             dialog.show(getSupportFragmentManager(), "TaskCreationDialog");
+        });
+
+        fabAddTask.setOnLongClickListener(v -> {
+            soundManager.playTaskComplete();
+            startActivity(new Intent(MainActivity.this, AchievementsActivity.class));
+            Toast.makeText(this, "🏆 Achievements", Toast.LENGTH_SHORT).show();
+            return true;
         });
 
         // === TALENTS BUTTON ===
@@ -485,6 +503,51 @@ public class MainActivity extends AppCompatActivity {
             currentTasksLiveData = taskViewModel.getFilteredTasks();
         }
         currentTasksLiveData.observe(this, tasks -> adapter.setTasks(tasks));
+    }
+
+    private void showAchievementUnlockedDialog(Achievement achievement) {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+
+            View view = LayoutInflater.from(this)
+                    .inflate(R.layout.dialog_achievement_unlocked, null);
+
+            ((TextView) view.findViewById(R.id.achievement_icon))
+                    .setText(achievement.getIcon());
+            ((TextView) view.findViewById(R.id.achievement_title))
+                    .setText(achievement.getTitle());
+            ((TextView) view.findViewById(R.id.achievement_description))
+                    .setText(achievement.getDescription());
+            ((TextView) view.findViewById(R.id.achievement_xp))
+                    .setText("✨ +" + achievement.getRewardXp() + " XP");
+            ((TextView) view.findViewById(R.id.achievement_gold))
+                    .setText("💰 +" + achievement.getRewardGold() + " Gold");
+
+            TextView iconView = view.findViewById(R.id.achievement_icon);
+            iconView.setScaleX(0f);
+            iconView.setScaleY(0f);
+            iconView.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(400)
+                    .setInterpolator(new OvershootInterpolator())
+                    .start();
+
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setView(view)
+                    .setCancelable(false)
+                    .create();
+
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawableResource(
+                        android.R.color.transparent);
+            }
+
+            view.findViewById(R.id.btn_awesome)
+                    .setOnClickListener(v -> dialog.dismiss());
+
+            dialog.show();
+
+        }, 1500);
     }
 
     @Override
