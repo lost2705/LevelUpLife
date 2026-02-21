@@ -32,5 +32,4 @@ public interface CompletedTaskDao {
 
     @Query("SELECT COUNT(*) FROM completed_tasks WHERE frequency = 'DAILY'")
     int getDailyCompletedCount();
-
 }

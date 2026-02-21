@@ -36,18 +36,18 @@ public class AchievementAdapter extends ListAdapter<Achievement, AchievementAdap
         holder.desc.setText(achievement.getDescription());
 
         if (achievement.isUnlocked()) {
-            holder.icon.setTextColor(0xFFD700);
-            holder.title.setTextColor(0xFFFFFF);
-            holder.desc.setTextColor(0xCCCCCC);
+            holder.icon.setTextColor(0xFFFFD700);
+            holder.title.setTextColor(0xFFFFFFFF);
+            holder.desc.setTextColor(0xFFCCCCCC);
             holder.status.setText("✅ UNLOCKED");
-            holder.status.setTextColor(0x4CAF50);
+            holder.status.setTextColor(0xFF4CAF50);
             holder.itemView.setAlpha(1.0f);
         } else {
-            holder.icon.setTextColor(0x666666);
-            holder.title.setTextColor(0x999999);
-            holder.desc.setTextColor(0x666666);
+            holder.icon.setTextColor(0xFF666666);
+            holder.title.setTextColor(0xFF999999);
+            holder.desc.setTextColor(0xFF666666);
             holder.status.setText("🔒 LOCKED");
-            holder.status.setTextColor(0x666666);
+            holder.status.setTextColor(0xFF666666);
             holder.itemView.setAlpha(0.6f);
         }
     }
@@ -73,7 +73,8 @@ public class AchievementAdapter extends ListAdapter<Achievement, AchievementAdap
         @SuppressLint("DiffUtilEquals")
         @Override
         public boolean areContentsTheSame(@NonNull Achievement oldItem, @NonNull Achievement newItem) {
-            return oldItem.equals(newItem);
+            return oldItem.isUnlocked() == newItem.isUnlocked()
+                    && oldItem.getUnlockedAt() == newItem.getUnlockedAt();
         }
     }
 }

@@ -38,6 +38,12 @@
             android:exported="false"
             android:theme="@style/Theme.LevelUpLife" />
 
+        <activity
+            android:name=".AchievementsActivity"
+            android:exported="false"
+            android:label="Achievements"
+            android:theme="@style/Theme.LevelUpLife" />
+
     </application>
 
 </manifest>

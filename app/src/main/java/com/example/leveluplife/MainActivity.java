@@ -239,15 +239,19 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, StatisticsActivity.class);
                 startActivity(intent);
             });
-
             btnStatistics.setOnLongClickListener(v -> {
                 WorkManager.getInstance(this)
                         .enqueue(new OneTimeWorkRequest.Builder(DailyResetWorker.class).build());
-                Toast.makeText(this,
-                        "🔧 Daily Reset triggered! Check in 3 seconds",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "🔧 Daily Reset triggered!", Toast.LENGTH_LONG).show();
                 return true;
             });
+        }
+
+        Button btnAchievements = findViewById(R.id.btn_achievements);
+        if (btnAchievements != null) {
+            btnAchievements.setOnClickListener(v ->
+                    startActivity(new Intent(MainActivity.this, AchievementsActivity.class))
+            );
         }
 
         // === SWIPE TO DELETE ===
@@ -522,28 +526,28 @@ public class MainActivity extends AppCompatActivity {
             ((TextView) view.findViewById(R.id.achievement_gold))
                     .setText("💰 +" + achievement.getRewardGold() + " Gold");
 
-            TextView iconView = view.findViewById(R.id.achievement_icon);
+            View iconView = view.findViewById(R.id.achievement_icon);
             iconView.setScaleX(0f);
             iconView.setScaleY(0f);
-            iconView.animate()
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setDuration(400)
-                    .setInterpolator(new OvershootInterpolator())
-                    .start();
+            iconView.animate().scaleX(1f).scaleY(1f).setDuration(400)
+                    .setInterpolator(new OvershootInterpolator()).start();
 
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setView(view)
                     .setCancelable(false)
                     .create();
 
-            if (dialog.getWindow() != null) {
-                dialog.getWindow().setBackgroundDrawableResource(
-                        android.R.color.transparent);
-            }
+            if (dialog.getWindow() != null)
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
             view.findViewById(R.id.btn_awesome)
                     .setOnClickListener(v -> dialog.dismiss());
+
+            view.findViewById(R.id.btn_view_all)
+                    .setOnClickListener(v -> {
+                        dialog.dismiss();
+                        startActivity(new Intent(MainActivity.this, AchievementsActivity.class));
+                    });
 
             dialog.show();
 
