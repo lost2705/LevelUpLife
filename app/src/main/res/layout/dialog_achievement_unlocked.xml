@@ -83,14 +83,32 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_awesome"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="Awesome! 🎉"
-        android:backgroundTint="#FFD700"
-        android:textColor="#1a1a2e"
-        android:textStyle="bold"
-        android:stateListAnimator="@null"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_awesome"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Awesome! 🎉"
+            android:backgroundTint="#FFD700"
+            android:textColor="#1a1a2e"
+            android:textStyle="bold"
+            android:layout_marginEnd="8dp"
+            android:stateListAnimator="@null"/>
+
+        <Button
+            android:id="@+id/btn_view_all"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="🏆 Все ачивки"
+            android:layout_marginStart="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+    </LinearLayout>
 
 </LinearLayout>

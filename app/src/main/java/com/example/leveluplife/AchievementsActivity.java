@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.leveluplife.data.entity.Achievement;
 import com.example.leveluplife.ui.achievement.AchievementAdapter;
 import com.example.leveluplife.viewModel.AchievementViewModel;
 
@@ -32,11 +33,13 @@ public class AchievementsActivity extends AppCompatActivity {
 
         viewModel.getAllAchievements().observe(this, achievements -> {
             adapter.submitList(achievements);
-            updateStats();
+            if (achievements != null) {
+                long unlocked = 0;
+                for (Achievement a : achievements) {
+                    if (a.isUnlocked()) unlocked++;
+                }
+                tvStats.setText("Unlocked " + unlocked + "/" + achievements.size());
+            }
         });
-    }
-
-    private void updateStats() {
-        tvStats.setText("Unlocked " + viewModel.getUnlockedCount() + "/" + viewModel.getTotalCount());
     }
 }
