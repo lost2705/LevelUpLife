@@ -11,15 +11,17 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import com.example.leveluplife.data.dao.AchievementDao;
 import com.example.leveluplife.data.dao.CompletedTaskDao;
 import com.example.leveluplife.data.dao.PlayerDao;
+import com.example.leveluplife.data.dao.ShopDao;
 import com.example.leveluplife.data.dao.TaskDao;
 import com.example.leveluplife.data.entity.Achievement;
 import com.example.leveluplife.data.entity.CompletedTask;
 import com.example.leveluplife.data.entity.Player;
+import com.example.leveluplife.data.entity.ShopItem;
 import com.example.leveluplife.data.entity.Task;
 
 @Database(
-        entities = {Task.class, Player.class, CompletedTask.class, Achievement.class},
-        version = 7,
+        entities = {Task.class, Player.class, CompletedTask.class, Achievement.class, ShopItem.class},
+        version = 8,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -28,6 +30,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract PlayerDao playerDao();
     public abstract CompletedTaskDao completedTaskDao();
     public abstract AchievementDao achievementDao();
+    public abstract ShopDao shopDao();
 
     private static volatile AppDatabase INSTANCE;
 
@@ -46,12 +49,14 @@ public abstract class AppDatabase extends RoomDatabase {
                                     Migrations.MIGRATION_3_4,
                                     Migrations.MIGRATION_4_5,
                                     Migrations.MIGRATION_5_6,
-                                    Migrations.MIGRATION_6_7
+                                    Migrations.MIGRATION_6_7,
+                                    Migrations.MIGRATION_7_8
                             )
                             .addCallback(new RoomDatabase.Callback() {
                                 @Override
                                 public void onCreate(@NonNull SupportSQLiteDatabase db) {
                                     super.onCreate(db);
+
                                     db.execSQL("INSERT INTO achievements " +
                                             "(id, title, description, icon, rewardXp, rewardGold, unlocked, unlockedAt) VALUES " +
                                             "(1, 'First Blood', 'Complete your first task', '⚔️', 100, 50, 0, 0), " +
@@ -65,8 +70,18 @@ public abstract class AppDatabase extends RoomDatabase {
                                             "(9, 'Strength Builder', 'Put 10 points into Strength', '💪', 350, 175, 0, 0), " +
                                             "(10, 'Balanced', 'Put points into all 5 attributes', '⚖️', 800, 400, 0, 0)"
                                     );
+
+                                    db.execSQL("INSERT INTO shop_items " +
+                                            "(name, description, icon, price, effectType, effectValue, available) VALUES " +
+                                            "('Penalty Shield', 'Removes all XP penalties', '🛡️', 200, 'REMOVE_PENALTY', 0, 1)," +
+                                            "('XP Boost', 'Double XP for your next task', '⚡', 150, 'XP_BOOST', 2, 1)," +
+                                            "('HP Potion', 'Restore 50 HP', '❤️', 100, 'HP_POTION', 50, 1)," +
+                                            "('Mana Potion', 'Restore 30 Mana', '💙', 80, 'MANA_POTION', 30, 1)," +
+                                            "('Gem Pack', 'Receive 5 Gems', '💎', 500, 'GEM_PACK', 5, 1)"
+                                    );
                                 }
                             })
+
                             .build();
                 }
             }

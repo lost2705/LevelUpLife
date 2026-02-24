@@ -88,4 +88,28 @@ public class Migrations {
             );
         }
     };
+
+    public static final Migration MIGRATION_7_8 = new Migration(7, 8) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS shop_items (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "name TEXT NOT NULL, " +
+                    "description TEXT NOT NULL, " +
+                    "icon TEXT NOT NULL, " +
+                    "price INTEGER NOT NULL DEFAULT 0, " +
+                    "effectType TEXT NOT NULL, " +
+                    "effectValue INTEGER NOT NULL DEFAULT 0, " +
+                    "available INTEGER NOT NULL DEFAULT 1" +
+                    ")");
+
+            database.execSQL("INSERT INTO shop_items " +
+                    "(name, description, icon, price, effectType, effectValue, available) VALUES " +
+                    "('Penalty Shield', 'Removes all XP penalties', '🛡️', 200, 'REMOVE_PENALTY', 0, 1)," +
+                    "('XP Boost', 'Double XP for your next task', '⚡', 150, 'XP_BOOST', 2, 1)," +
+                    "('HP Potion', 'Restore 50 HP', '❤️', 100, 'HP_POTION', 50, 1)," +
+                    "('Mana Potion', 'Restore 30 Mana', '💙', 80, 'MANA_POTION', 30, 1)," +
+                    "('Gem Pack', 'Receive 5 Gems', '💎', 500, 'GEM_PACK', 5, 1)");
+        }
+    };
 }

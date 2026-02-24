@@ -7,6 +7,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.leveluplife.data.database.AppDatabase;
 import com.example.leveluplife.data.entity.CompletedTask;
 import com.example.leveluplife.viewModel.CompletedTaskViewModel;
 import com.example.leveluplife.viewModel.PlayerViewModel;
@@ -97,7 +98,6 @@ public class StatisticsActivity extends AppCompatActivity {
 
     private void loadStatistics() {
         executor.execute(() -> {
-            // Get data for last 7 days
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
@@ -105,56 +105,54 @@ public class StatisticsActivity extends AppCompatActivity {
             calendar.set(Calendar.MILLISECOND, 0);
 
             long todayStart = calendar.getTimeInMillis();
-            calendar.add(Calendar.DAY_OF_YEAR, -6); // 7 days ago
+            calendar.add(Calendar.DAY_OF_YEAR, -6);
             long weekStart = calendar.getTimeInMillis();
 
-            // Get completed tasks for this week
-            int weekCount = completedTaskViewModel.getCompletedTasksCountSince(weekStart);
-
-            // Get total completed tasks
+            int weekCount  = completedTaskViewModel.getCompletedTasksCountSince(weekStart);
             int totalCount = completedTaskViewModel.getCompletedTasksCountSince(0);
+            int totalXp = AppDatabase.getDatabase(getApplicationContext())
+                    .completedTaskDao().getTotalXpEarned();
+            int bestStreak = AppDatabase.getDatabase(getApplicationContext())
+                    .taskDao().getMaxBestStreak();
 
             runOnUiThread(() -> {
                 tvTotalCompleted.setText(String.valueOf(totalCount));
                 tvThisWeek.setText(String.valueOf(weekCount));
+                tvTotalXp.setText(String.valueOf(totalXp));
+                tvCurrentStreak.setText(String.valueOf(bestStreak));
             });
 
-            // Load chart data
             loadChartData(weekStart, todayStart);
         });
 
-        // Load player stats
-        playerViewModel.getPlayer().observe(this, player -> {
-            if (player != null) {
-                tvTotalXp.setText(String.valueOf(player.getCurrentXp() + (player.getLevel() * 100)));
-                tvCurrentStreak.setText("0"); // TODO: Implement streak tracking
-            }
-        });
-
-        // Load category breakdown
         loadCategoryBreakdown();
     }
 
-    private void loadChartData(long startTime, long endTime) {
+    private void loadChartData(long weekStart, long todayEnd) {
         executor.execute(() -> {
+            List<CompletedTask> weekTasks = completedTaskViewModel
+                    .getCompletedTasksSince(weekStart);
+
             List<BarEntry> entries = new ArrayList<>();
             List<String> labels = new ArrayList<>();
+            SimpleDateFormat dayFormat = new SimpleDateFormat("EEE", Locale.getDefault());
 
             Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(startTime);
-            SimpleDateFormat dayFormat = new SimpleDateFormat("EEE", Locale.getDefault());
+            calendar.setTimeInMillis(weekStart);
 
             for (int i = 0; i < 7; i++) {
                 long dayStart = calendar.getTimeInMillis();
                 calendar.add(Calendar.DAY_OF_YEAR, 1);
                 long dayEnd = calendar.getTimeInMillis();
 
-                // Count tasks completed on this day
-                int count = completedTaskViewModel.getCompletedTasksCountSince(dayStart) -
-                        completedTaskViewModel.getCompletedTasksCountSince(dayEnd);
+                int count = 0;
+                for (CompletedTask task : weekTasks) {
+                    if (task.getCompletedAt() >= dayStart && task.getCompletedAt() < dayEnd) {
+                        count++;
+                    }
+                }
 
                 entries.add(new BarEntry(i, count));
-
                 calendar.setTimeInMillis(dayStart);
                 labels.add(dayFormat.format(calendar.getTime()));
                 calendar.setTimeInMillis(dayEnd);
@@ -170,11 +168,13 @@ public class StatisticsActivity extends AppCompatActivity {
                 barData.setBarWidth(0.8f);
 
                 chartWeekly.setData(barData);
-                chartWeekly.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+                chartWeekly.getXAxis().setValueFormatter(
+                        new IndexAxisValueFormatter(labels));
                 chartWeekly.invalidate();
             });
         });
     }
+
 
     private void loadCategoryBreakdown() {
         executor.execute(() -> {

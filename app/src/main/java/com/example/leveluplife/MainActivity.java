@@ -247,6 +247,14 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        Button btnShop = findViewById(R.id.btn_shop);
+        if (btnShop != null) {
+            btnShop.setOnClickListener(v ->
+                    startActivity(new Intent(MainActivity.this, ShopActivity.class))
+            );
+        }
+
+
         Button btnAchievements = findViewById(R.id.btn_achievements);
         if (btnAchievements != null) {
             btnAchievements.setOnClickListener(v ->
