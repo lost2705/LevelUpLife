@@ -61,4 +61,8 @@ public interface TaskDao {
 
     @Query("UPDATE tasks SET nextReminderTime = :nextTime WHERE id = :taskId")
     void updateNextReminderTime(int taskId, long nextTime);
+
+    @Query("SELECT MAX(bestStreak) FROM tasks")
+    int getMaxBestStreak();
+
 }
