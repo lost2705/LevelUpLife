@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_stats"
+        android:icon="@drawable/ic_stats"
+        android:title="Stats" />
+
+    <item
+        android:id="@+id/nav_talents"
+        android:icon="@drawable/ic_talents"
+        android:title="Talents" />
+
+    <item
+        android:id="@+id/nav_trophies"
+        android:icon="@drawable/ic_trophies"
+        android:title="Trophies" />
+
+    <item
+        android:id="@+id/nav_shop"
+        android:icon="@drawable/ic_shop"
+        android:title="Shop" />
+
+</menu>

@@ -35,4 +35,7 @@ public interface CompletedTaskDao {
 
     @Query("SELECT COALESCE(SUM(xpEarned), 0) FROM completed_tasks")
     int getTotalXpEarned();
+
+    @Query("DELETE FROM completed_tasks")
+    void deleteAllCompletedTasks();
 }

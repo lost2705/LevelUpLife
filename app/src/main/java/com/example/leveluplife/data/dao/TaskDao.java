@@ -20,6 +20,9 @@ public interface TaskDao {
     @Query("SELECT * FROM tasks WHERE completed = 0 ORDER BY id ASC")
     LiveData<List<Task>> getPendingTasksLiveData();
 
+    @Query("DELETE FROM tasks")
+    void deleteAllTasks();
+
     @Query("SELECT * FROM tasks ORDER BY id DESC")
     List<Task> getAllTasks();
 

@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +39,7 @@ import com.example.leveluplife.viewModel.PlayerViewModel;
 import com.example.leveluplife.viewModel.TaskViewModel;
 import com.example.leveluplife.workers.DailyResetWorker;
 import com.example.leveluplife.workers.ReminderWorker;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -76,10 +76,8 @@ public class MainActivity extends AppCompatActivity {
         scheduleDailyReset();
         scheduleReminderChecker();
 
-        // === SOUND MANAGER INITIALIZATION ===
         soundManager = SoundManager.getInstance(this);
 
-        // === VIEWMODEL INITIALIZATION ===
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         completedTaskViewModel = new ViewModelProvider(this).get(CompletedTaskViewModel.class);
@@ -87,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
         playerViewModel.initializePlayerIfNeeded();
         tvXpPenalty = findViewById(R.id.tvXpPenalty);
 
-        // === RECYCLERVIEW SETUP ===
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         adapter = new TaskAdapter();
         recyclerView.setAdapter(adapter);
@@ -98,17 +95,11 @@ public class MainActivity extends AppCompatActivity {
             if (!checkedIds.isEmpty()) {
                 int checkedId = checkedIds.get(0);
                 String filter;
-                if (checkedId == R.id.chipAll) {
-                    filter = "ALL";
-                } else if (checkedId == R.id.chipDaily) {
-                    filter = "DAILY";
-                } else if (checkedId == R.id.chipTodo) {
-                    filter = "TODO";
-                } else if (checkedId == R.id.chipHabit) {
-                    filter = "HABIT";
-                } else {
-                    filter = "ALL";
-                }
+                if (checkedId == R.id.chipAll)        filter = "ALL";
+                else if (checkedId == R.id.chipDaily) filter = "DAILY";
+                else if (checkedId == R.id.chipTodo)  filter = "TODO";
+                else if (checkedId == R.id.chipHabit) filter = "HABIT";
+                else                                  filter = "ALL";
                 applyFilter(filter);
             }
         });
@@ -128,12 +119,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         playerViewModel.getAchievementUnlockEvent().observe(this, achievement -> {
-            if (achievement != null) {
-                showAchievementUnlockedDialog(achievement);
-            }
+            if (achievement != null) showAchievementUnlockedDialog(achievement);
         });
 
-        // === TASK COMPLETION TOGGLE ===
         adapter.setOnTaskClickListener((task, position) -> {
             boolean wasCompleted = task.isCompleted();
             task.setCompleted(!wasCompleted);
@@ -144,12 +132,8 @@ public class MainActivity extends AppCompatActivity {
 
             if (task.isCompleted() && !task.isRewardClaimed()) {
                 CompletedTask completedTask = new CompletedTask(
-                        task.getId(),
-                        task.getTitle(),
-                        task.getXpReward(),
-                        task.getGoldReward(),
-                        task.getFrequency()
-                );
+                        task.getId(), task.getTitle(),
+                        task.getXpReward(), task.getGoldReward(), task.getFrequency());
                 completedTaskViewModel.insert(completedTask);
 
                 Player player = playerViewModel.getPlayer().getValue();
@@ -195,10 +179,10 @@ public class MainActivity extends AppCompatActivity {
             editDialog.show(getSupportFragmentManager(), "TaskEditDialog");
         });
 
-        // === FAB (CREATE TASK) ===
         FloatingActionButton fabAddTask = findViewById(R.id.fabAddTask);
         fabAddTask.postDelayed(() ->
-                fabAddTask.startAnimation(android.view.animation.AnimationUtils.loadAnimation(this, R.anim.bounce)
+                fabAddTask.startAnimation(
+                        android.view.animation.AnimationUtils.loadAnimation(this, R.anim.bounce)
                 ), 500);
 
         fabAddTask.setOnClickListener(v -> {
@@ -209,60 +193,43 @@ public class MainActivity extends AppCompatActivity {
 
         fabAddTask.setOnLongClickListener(v -> {
             soundManager.playTaskComplete();
-            startActivity(new Intent(MainActivity.this, AchievementsActivity.class));
-            Toast.makeText(this, "🏆 Achievements", Toast.LENGTH_SHORT).show();
+            WorkManager.getInstance(this)
+                    .enqueue(new OneTimeWorkRequest.Builder(ReminderWorker.class).build());
+            Toast.makeText(this, "🔔 ReminderWorker triggered!", Toast.LENGTH_SHORT).show();
             return true;
         });
 
-        // === TALENTS BUTTON ===
-        Button btnTalents = findViewById(R.id.btn_talents);
-        if (btnTalents != null) {
-            btnTalents.setOnClickListener(v -> {
-                Intent intent = new Intent(MainActivity.this, TalentsActivity.class);
-                startActivity(intent);
-            });
+        findViewById(R.id.btnSettings).setOnClickListener(v ->
+                startActivity(new Intent(this, SettingsActivity.class))
+        );
 
-            btnTalents.setOnLongClickListener(v -> {
-                WorkManager.getInstance(this)
-                        .enqueue(new OneTimeWorkRequest.Builder(ReminderWorker.class).build());
-                Toast.makeText(this,
-                        "🔔 ReminderWorker запущен! Logcat → tag:ReminderWorker",
-                        Toast.LENGTH_LONG).show();
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_stats) {
+                startActivity(new Intent(this, StatisticsActivity.class));
                 return true;
-            });
-        }
-
-        // === STATISTICS BUTTON ===
-        Button btnStatistics = findViewById(R.id.btn_statistics);
-        if (btnStatistics != null) {
-            btnStatistics.setOnClickListener(v -> {
-                Intent intent = new Intent(MainActivity.this, StatisticsActivity.class);
-                startActivity(intent);
-            });
-            btnStatistics.setOnLongClickListener(v -> {
-                WorkManager.getInstance(this)
-                        .enqueue(new OneTimeWorkRequest.Builder(DailyResetWorker.class).build());
-                Toast.makeText(this, "🔧 Daily Reset triggered!", Toast.LENGTH_LONG).show();
+            } else if (id == R.id.nav_talents) {
+                startActivity(new Intent(this, TalentsActivity.class));
                 return true;
-            });
-        }
+            } else if (id == R.id.nav_trophies) {
+                startActivity(new Intent(this, AchievementsActivity.class));
+                return true;
+            } else if (id == R.id.nav_shop) {
+                startActivity(new Intent(this, ShopActivity.class));
+                return true;
+            }
+            return false;
+        });
 
-        Button btnShop = findViewById(R.id.btn_shop);
-        if (btnShop != null) {
-            btnShop.setOnClickListener(v ->
-                    startActivity(new Intent(MainActivity.this, ShopActivity.class))
-            );
-        }
+        bottomNav.findViewById(R.id.nav_stats).setOnLongClickListener(v -> {
+            WorkManager.getInstance(this)
+                    .enqueue(new OneTimeWorkRequest.Builder(DailyResetWorker.class).build());
+            Toast.makeText(this, "🔧 Daily Reset triggered!", Toast.LENGTH_LONG).show();
+            return true;
+        });
 
 
-        Button btnAchievements = findViewById(R.id.btn_achievements);
-        if (btnAchievements != null) {
-            btnAchievements.setOnClickListener(v ->
-                    startActivity(new Intent(MainActivity.this, AchievementsActivity.class))
-            );
-        }
-
-        // === SWIPE TO DELETE ===
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
                     @Override
@@ -301,7 +268,6 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
                 "daily_reset", ExistingPeriodicWorkPolicy.KEEP, resetWork);
-        Log.d(TAG, "Daily reset scheduled in " + (delayToMidnight / 1000 / 60) + " min");
     }
 
     private void scheduleReminderChecker() {
@@ -310,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
                 "reminder_checker", ExistingPeriodicWorkPolicy.KEEP, reminderWork);
-        Log.d(TAG, "✅ ReminderChecker scheduled (every 15 min)");
     }
 
     private void requestNotificationPermission() {
@@ -318,9 +283,7 @@ public class MainActivity extends AppCompatActivity {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
                     != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(
-                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
-                        1001
-                );
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1001);
             }
         }
     }
@@ -334,7 +297,6 @@ public class MainActivity extends AppCompatActivity {
         calendar.add(Calendar.DAY_OF_MONTH, 1);
         return calendar.getTimeInMillis() - System.currentTimeMillis();
     }
-
 
     private void updatePlayerUI(Player player) {
         TextView playerLevelText = findViewById(R.id.playerLevelText);
@@ -448,19 +410,18 @@ public class MainActivity extends AppCompatActivity {
         view.setAlpha(1f);
     }
 
-
     private void showLevelUpDialog(LevelUpEvent event) {
         Log.d(TAG, "showLevelUpDialog called! Level " + event.newLevel);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_level_up, null);
 
-        TextView tvLevelUp = dialogView.findViewById(R.id.tv_level_up);
-        TextView tvLevelNumber = dialogView.findViewById(R.id.tv_level_number);
+        TextView tvLevelUp      = dialogView.findViewById(R.id.tv_level_up);
+        TextView tvLevelNumber  = dialogView.findViewById(R.id.tv_level_number);
         TextView tvTalentPoints = dialogView.findViewById(R.id.tv_talent_points);
-        TextView tvMaxHp = dialogView.findViewById(R.id.tv_max_hp);
-        TextView tvMaxMana = dialogView.findViewById(R.id.tv_max_mana);
-        Button btnAwesome = dialogView.findViewById(R.id.btn_awesome);
+        TextView tvMaxHp        = dialogView.findViewById(R.id.tv_max_hp);
+        TextView tvMaxMana      = dialogView.findViewById(R.id.tv_max_mana);
+        android.widget.Button btnAwesome = dialogView.findViewById(R.id.btn_awesome);
         KonfettiView konfettiView = dialogView.findViewById(R.id.konfettiView);
 
         if (tvLevelUp != null)      tvLevelUp.setText("🎉 LEVEL UP! 🎉");
@@ -519,20 +480,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void showAchievementUnlockedDialog(Achievement achievement) {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-
             View view = LayoutInflater.from(this)
                     .inflate(R.layout.dialog_achievement_unlocked, null);
 
-            ((TextView) view.findViewById(R.id.achievement_icon))
-                    .setText(achievement.getIcon());
-            ((TextView) view.findViewById(R.id.achievement_title))
-                    .setText(achievement.getTitle());
-            ((TextView) view.findViewById(R.id.achievement_description))
-                    .setText(achievement.getDescription());
-            ((TextView) view.findViewById(R.id.achievement_xp))
-                    .setText("✨ +" + achievement.getRewardXp() + " XP");
-            ((TextView) view.findViewById(R.id.achievement_gold))
-                    .setText("💰 +" + achievement.getRewardGold() + " Gold");
+            ((TextView) view.findViewById(R.id.achievement_icon)).setText(achievement.getIcon());
+            ((TextView) view.findViewById(R.id.achievement_title)).setText(achievement.getTitle());
+            ((TextView) view.findViewById(R.id.achievement_description)).setText(achievement.getDescription());
+            ((TextView) view.findViewById(R.id.achievement_xp)).setText("✨ +" + achievement.getRewardXp() + " XP");
+            ((TextView) view.findViewById(R.id.achievement_gold)).setText("💰 +" + achievement.getRewardGold() + " Gold");
 
             View iconView = view.findViewById(R.id.achievement_icon);
             iconView.setScaleX(0f);
@@ -548,17 +503,13 @@ public class MainActivity extends AppCompatActivity {
             if (dialog.getWindow() != null)
                 dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-            view.findViewById(R.id.btn_awesome)
-                    .setOnClickListener(v -> dialog.dismiss());
-
-            view.findViewById(R.id.btn_view_all)
-                    .setOnClickListener(v -> {
-                        dialog.dismiss();
-                        startActivity(new Intent(MainActivity.this, AchievementsActivity.class));
-                    });
+            view.findViewById(R.id.btn_awesome).setOnClickListener(v -> dialog.dismiss());
+            view.findViewById(R.id.btn_view_all).setOnClickListener(v -> {
+                dialog.dismiss();
+                startActivity(new Intent(MainActivity.this, AchievementsActivity.class));
+            });
 
             dialog.show();
-
         }, 1500);
     }
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -31,4 +32,10 @@ public interface ShopDao {
 
     @Query("UPDATE shop_items SET available = :available WHERE id = :id")
     void setAvailability(int id, boolean available);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertItems(ShopItem... items);
+
+    @Query("DELETE FROM shop_items")
+    void deleteAllItems();
 }

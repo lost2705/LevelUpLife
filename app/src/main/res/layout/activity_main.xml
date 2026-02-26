@@ -20,6 +20,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageButton
+        android:id="@+id/btnSettings"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="12dp"
+        android:src="@drawable/ic_settings"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/xpText"
+        app:tint="@color/white" />
+
     <TextView
         android:id="@+id/xpText"
         android:layout_width="wrap_content"
@@ -30,6 +42,7 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/playerLevelText" />
+
 
     <ProgressBar
         android:id="@+id/xpProgressBar"
@@ -186,7 +199,7 @@
         android:layout_marginTop="8dp"
         android:padding="8dp"
         app:layout_constraintTop_toBottomOf="@id/chipGroupFilters"
-        app:layout_constraintBottom_toTopOf="@id/btn_statistics"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -202,67 +215,17 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
-        android:id="@+id/btn_statistics"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#448AFF"
-        android:text="📊 STATS"
-        android:textColor="#FFFFFF"
-        android:textSize="11sp"
-        android:textStyle="bold"
+        android:background="#2A2A2A"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@color/bottom_nav_color"
+        app:itemTextColor="@color/bottom_nav_color"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btn_talents"
-        app:layout_constraintHorizontal_chainStyle="spread" />
-
-    <Button
-        android:id="@+id/btn_talents"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="2dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#BB86FC"
-        android:text="⭐ TALENTS"
-        android:textColor="#FFFFFF"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btn_statistics"
-        app:layout_constraintEnd_toStartOf="@id/btn_achievements" />
-
-    <Button
-        android:id="@+id/btn_achievements"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="2dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#FFD700"
-        android:text="🏆 TROPHIES"
-        android:textColor="#1a1a2e"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btn_talents"
-        app:layout_constraintEnd_toStartOf="@id/btn_shop" />
-
-    <Button
-        android:id="@+id/btn_shop"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#4CAF50"
-        android:text="🛒 SHOP"
-        android:textColor="#FFFFFF"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btn_achievements"
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

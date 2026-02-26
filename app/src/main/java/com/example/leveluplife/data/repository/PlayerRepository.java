@@ -180,6 +180,13 @@ public class PlayerRepository {
         });
     }
 
+    public static synchronized void resetInstance() {
+        if (instance != null) {
+            instance.executor.shutdown();
+            instance = null;
+        }
+    }
+
     public LiveData<LevelUpEvent> getLevelUpEvent() {
         return levelUpEvent;
     }

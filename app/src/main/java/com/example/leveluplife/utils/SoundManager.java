@@ -85,4 +85,11 @@ public class SoundManager {
             soundPool = null;
         }
     }
+
+    public static void resetInstance() {
+        if (instance != null) {
+            instance.release();
+            instance = null;
+        }
+    }
 }
