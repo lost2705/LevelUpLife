@@ -40,4 +40,7 @@ public interface AchievementDao {
 
     @Query("SELECT * FROM achievements ORDER BY id")
     List<Achievement> getAllAchievementsSync();
+
+    @Query("DELETE FROM achievements")
+    void deleteAllAchievements();
 }

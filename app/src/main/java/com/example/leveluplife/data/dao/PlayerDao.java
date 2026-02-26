@@ -26,4 +26,7 @@ public interface PlayerDao {
 
     @Query("SELECT COUNT(*) FROM player WHERE id = 1")
     int playerExists();
+
+    @Query("DELETE FROM player")
+    void deletePlayer();
 }

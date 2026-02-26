@@ -49,6 +49,8 @@
             android:exported="false"
             android:theme="@style/Theme.LevelUpLife" />
 
+        <activity android:name=".SettingsActivity" />
+
 
     </application>
 

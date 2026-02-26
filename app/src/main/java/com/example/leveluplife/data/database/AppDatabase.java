@@ -56,36 +56,43 @@ public abstract class AppDatabase extends RoomDatabase {
                                 @Override
                                 public void onCreate(@NonNull SupportSQLiteDatabase db) {
                                     super.onCreate(db);
-
-                                    db.execSQL("INSERT INTO achievements " +
-                                            "(id, title, description, icon, rewardXp, rewardGold, unlocked, unlockedAt) VALUES " +
-                                            "(1, 'First Blood', 'Complete your first task', '⚔️', 100, 50, 0, 0), " +
-                                            "(2, 'Daily Routine', 'Complete 7 daily tasks in a row', '📅', 250, 100, 0, 0), " +
-                                            "(3, 'Level Up!', 'Reach Level 5', '⭐', 500, 200, 0, 0), " +
-                                            "(4, 'Gold Rush', 'Earn 1000 gold', '💰', 300, 150, 0, 0), " +
-                                            "(5, 'Task Master', 'Complete 50 tasks', '🎯', 400, 200, 0, 0), " +
-                                            "(6, 'Perfect Day', 'Complete all daily tasks 5 days in a row', '✅', 600, 300, 0, 0), " +
-                                            "(7, 'Level Master', 'Reach Level 10', '👑', 1000, 500, 0, 0), " +
-                                            "(8, 'Wealthy', 'Earn 5000 gold', '🏦', 700, 400, 0, 0), " +
-                                            "(9, 'Strength Builder', 'Put 10 points into Strength', '💪', 350, 175, 0, 0), " +
-                                            "(10, 'Balanced', 'Put points into all 5 attributes', '⚖️', 800, 400, 0, 0)"
-                                    );
-
-                                    db.execSQL("INSERT INTO shop_items " +
-                                            "(name, description, icon, price, effectType, effectValue, available) VALUES " +
-                                            "('Penalty Shield', 'Removes all XP penalties', '🛡️', 200, 'REMOVE_PENALTY', 0, 1)," +
-                                            "('XP Boost', 'Double XP for your next task', '⚡', 150, 'XP_BOOST', 2, 1)," +
-                                            "('HP Potion', 'Restore 50 HP', '❤️', 100, 'HP_POTION', 50, 1)," +
-                                            "('Mana Potion', 'Restore 30 Mana', '💙', 80, 'MANA_POTION', 30, 1)," +
-                                            "('Gem Pack', 'Receive 5 Gems', '💎', 500, 'GEM_PACK', 5, 1)"
-                                    );
+                                    new Thread(() -> seedData(getDatabase(context))).start();
                                 }
                             })
-
                             .build();
                 }
             }
         }
         return INSTANCE;
+    }
+
+    public static void seedData(AppDatabase db) {
+        seedAchievements(db);
+        seedShopItems(db);
+    }
+
+    private static void seedAchievements(AppDatabase db) {
+        db.achievementDao().insertAchievements(
+                new Achievement(1,  "First Blood",      "Complete your first task",                  "⚔️",  100,  50),
+                new Achievement(2,  "Daily Routine",    "Complete 7 daily tasks in a row",           "📅",  250, 100),
+                new Achievement(3,  "Level Up!",        "Reach Level 5",                             "⭐",  500, 200),
+                new Achievement(4,  "Gold Rush",        "Earn 1000 gold",                            "💰",  300, 150),
+                new Achievement(5,  "Task Master",      "Complete 50 tasks",                         "🎯",  400, 200),
+                new Achievement(6,  "Perfect Day",      "Complete all daily tasks 5 days in a row",  "✅",  600, 300),
+                new Achievement(7,  "Level Master",     "Reach Level 10",                            "👑", 1000, 500),
+                new Achievement(8,  "Wealthy",          "Earn 5000 gold",                            "🏦",  700, 400),
+                new Achievement(9,  "Strength Builder", "Put 10 points into Strength",               "💪",  350, 175),
+                new Achievement(10, "Balanced",         "Put points into all 5 attributes",          "⚖️",  800, 400)
+        );
+    }
+
+    private static void seedShopItems(AppDatabase db) {
+        db.shopDao().insertItems(
+                new ShopItem("Penalty Shield", "Removes all XP penalties",     "🛡️", 200, "REMOVE_PENALTY", 0),
+                new ShopItem("XP Boost",       "Double XP for your next task", "⚡",  150, "XP_BOOST",       2),
+                new ShopItem("HP Potion",      "Restore 50 HP",                "❤️",  100, "HP_POTION",       50),
+                new ShopItem("Mana Potion",    "Restore 30 Mana",              "💙",   80, "MANA_POTION",     30),
+                new ShopItem("Gem Pack",       "Receive 5 Gems",               "💎",  500, "GEM_PACK",        5)
+        );
     }
 }
