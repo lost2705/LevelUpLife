@@ -4,60 +4,98 @@
     android:id="@+id/taskCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="6dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    android:backgroundTint="#1E1E1E"
-    app:cardCornerRadius="12dp"
+    app:cardBackgroundColor="#2A2A2A"
+    app:cardCornerRadius="16dp"
     app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
         android:clickable="false"
         android:focusable="false">
 
-        <CheckBox
-            android:id="@+id/taskCheckbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <View
+            android:id="@+id/attributeStripe"
+            android:layout_width="5dp"
+            android:layout_height="match_parent"
+            android:background="#BB86FC" />
+
+        <TextView
+            android:id="@+id/attributeIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="center_vertical"
-            android:buttonTint="#BB86FC"
+            android:layout_marginStart="12dp"
+            android:gravity="center"
+            android:text="💪"
+            android:textSize="20sp"
+            android:background="@drawable/attribute_icon_bg"
             android:clickable="false"
-            android:focusable="false" />
+            android:focusable="false"/>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="12dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="14dp"
+            android:layout_marginEnd="8dp"
             android:orientation="vertical"
             android:clickable="false"
             android:focusable="false">
-
-            <TextView
-                android:id="@+id/taskTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:text="Task Title" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="4dp">
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/taskTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:text="Task Title" />
+
+                <TextView
+                    android:id="@+id/taskTypeBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DAILY"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="#BB86FC"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:background="@drawable/badge_background"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="6dp">
 
                 <TextView
                     android:id="@+id/taskXp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:textColor="#BB86FC"
                     android:text="⭐ +20 XP" />
 
@@ -66,14 +104,23 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:textColor="#FFD700"
-                    android:text="💰 +10 Gold"
-                    android:visibility="gone" />
+                    android:text="💰 +10 Gold" />
 
             </LinearLayout>
 
         </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/taskCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="16dp"
+            android:buttonTint="#BB86FC"
+            android:clickable="false"
+            android:focusable="false" />
 
     </LinearLayout>
 

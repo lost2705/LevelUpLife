@@ -22,6 +22,8 @@ public class AchievementsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_achievements);
 
+        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
+
         recyclerView = findViewById(R.id.recycler_achievements);
         tvStats = findViewById(R.id.tv_achievements_stats);
 
@@ -38,8 +40,14 @@ public class AchievementsActivity extends AppCompatActivity {
                 for (Achievement a : achievements) {
                     if (a.isUnlocked()) unlocked++;
                 }
-                tvStats.setText("Unlocked " + unlocked + "/" + achievements.size());
+                tvStats.setText(unlocked + "/" + achievements.size());
             }
         });
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }
