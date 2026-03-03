@@ -105,7 +105,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         currentTasksLiveData = taskViewModel.getAllTasks();
-        currentTasksLiveData.observe(this, tasks -> adapter.setTasks(tasks));
+        currentTasksLiveData.observe(this, tasks -> {
+            adapter.setTasks(tasks);
+            updateEmptyState(tasks);
+        });
+
 
         playerViewModel.getPlayer().observe(this, player -> {
             if (player != null) updatePlayerUI(player);
@@ -208,26 +212,26 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
             if (id == R.id.nav_stats) {
                 startActivity(new Intent(this, StatisticsActivity.class));
-                return true;
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             } else if (id == R.id.nav_talents) {
                 startActivity(new Intent(this, TalentsActivity.class));
-                return true;
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             } else if (id == R.id.nav_trophies) {
                 startActivity(new Intent(this, AchievementsActivity.class));
-                return true;
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             } else if (id == R.id.nav_shop) {
                 startActivity(new Intent(this, ShopActivity.class));
-                return true;
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
+            bottomNav.post(() -> bottomNav.getMenu().setGroupCheckable(0, true, false));
             return false;
         });
 
-        bottomNav.findViewById(R.id.nav_stats).setOnLongClickListener(v -> {
-            WorkManager.getInstance(this)
-                    .enqueue(new OneTimeWorkRequest.Builder(DailyResetWorker.class).build());
-            Toast.makeText(this, "🔧 Daily Reset triggered!", Toast.LENGTH_LONG).show();
-            return true;
+        findViewById(R.id.btnSettings).setOnClickListener(v -> {
+            startActivity(new Intent(this, SettingsActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
+
 
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
@@ -475,8 +479,12 @@ public class MainActivity extends AppCompatActivity {
             taskViewModel.setFilter(filter);
             currentTasksLiveData = taskViewModel.getFilteredTasks();
         }
-        currentTasksLiveData.observe(this, tasks -> adapter.setTasks(tasks));
+        currentTasksLiveData.observe(this, tasks -> {
+            adapter.setTasks(tasks);
+            updateEmptyState(tasks);
+        });
     }
+
 
     private void showAchievementUnlockedDialog(Achievement achievement) {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -512,6 +520,22 @@ public class MainActivity extends AppCompatActivity {
             dialog.show();
         }, 1500);
     }
+
+    private void updateEmptyState(List<Task> tasks) {
+        View emptyState = findViewById(R.id.emptyState);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+
+        if (tasks == null || tasks.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            emptyState.setVisibility(View.VISIBLE);
+            emptyState.setAlpha(0f);
+            emptyState.animate().alpha(1f).setDuration(400).start();
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyState.setVisibility(View.GONE);
+        }
+    }
+
 
     @Override
     protected void onDestroy() {
