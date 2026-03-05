@@ -21,7 +21,7 @@ import com.example.leveluplife.data.entity.Task;
 
 @Database(
         entities = {Task.class, Player.class, CompletedTask.class, Achievement.class, ShopItem.class},
-        version = 8,
+        version = 9,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -50,7 +50,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     Migrations.MIGRATION_4_5,
                                     Migrations.MIGRATION_5_6,
                                     Migrations.MIGRATION_6_7,
-                                    Migrations.MIGRATION_7_8
+                                    Migrations.MIGRATION_7_8,
+                                    Migrations.MIGRATION_8_9
                             )
                             .addCallback(new RoomDatabase.Callback() {
                                 @Override

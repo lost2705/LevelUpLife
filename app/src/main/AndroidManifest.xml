@@ -50,6 +50,8 @@
             android:theme="@style/Theme.LevelUpLife" />
 
         <activity android:name=".SettingsActivity" />
+        <activity android:name=".OnboardingActivity"/>
+        <activity android:name=".HeroActivity"/>
 
 
     </application>
