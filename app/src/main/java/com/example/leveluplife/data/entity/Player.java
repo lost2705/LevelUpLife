@@ -13,6 +13,8 @@ public class Player {
     private long xpToNextLevel;
     private int gold;
     private int gems;
+    private String heroName;
+    private String heroClass;
 
     private int maxHp;
     private int currentHp;
@@ -32,6 +34,8 @@ public class Player {
         this.xpToNextLevel = 100;
         this.gold = 0;
         this.gems = 0;
+        this.heroName = "Hero";
+        this.heroClass = null;
 
         this.maxHp = 100;
         this.currentHp = 100;
@@ -100,6 +104,21 @@ public class Player {
 
     public int getTalentPoints() {
         return talentPoints;
+    }
+    public String getHeroName() {
+        return heroName;
+    }
+
+    public void setHeroName(String heroName) {
+        this.heroName = heroName;
+    }
+
+    public String getHeroClass() {
+        return heroClass;
+    }
+
+    public void setHeroClass(String heroClass) {
+        this.heroClass = heroClass;
     }
 
     public void setId(int id) {

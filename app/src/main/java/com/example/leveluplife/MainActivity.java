@@ -1,6 +1,7 @@
 package com.example.leveluplife;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -71,6 +72,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences prefs = getSharedPreferences("app_settings", MODE_PRIVATE);
+        if (!prefs.getBoolean("onboarding_complete", false)) {
+            startActivity(new Intent(this, OnboardingActivity.class));
+            finish();
+            return;
+        }
 
         requestNotificationPermission();
         scheduleDailyReset();
@@ -221,6 +229,9 @@ public class MainActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             } else if (id == R.id.nav_shop) {
                 startActivity(new Intent(this, ShopActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            } else if (id == R.id.nav_hero) {
+                startActivity(new Intent(this, HeroActivity.class));
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
             bottomNav.post(() -> bottomNav.getMenu().setGroupCheckable(0, true, false));

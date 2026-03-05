@@ -112,4 +112,12 @@ public class Migrations {
                     "('Gem Pack', 'Receive 5 Gems', '💎', 500, 'GEM_PACK', 5, 1)");
         }
     };
+
+    public static final Migration MIGRATION_8_9 = new Migration(8, 9) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE player ADD COLUMN heroName TEXT DEFAULT 'Hero'");
+            database.execSQL("ALTER TABLE player ADD COLUMN heroClass TEXT DEFAULT NULL");
+        }
+    };
 }

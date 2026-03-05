@@ -153,6 +153,30 @@ public class PlayerViewModel extends AndroidViewModel {
         achievementUnlockEvent.postValue(ach);
     }
 
+    public void setHeroName(String name) {
+        executor.execute(() -> {
+            Player player = repository.getPlayerSync();
+            if (player == null) {
+                player = new Player();
+                player.setHeroName(name);
+                repository.insertPlayer(player);
+            } else {
+                player.setHeroName(name);
+                repository.updatePlayer(player);
+            }
+        });
+    }
+
+    public void setHeroClass(String heroClass) {
+        executor.execute(() -> {
+            Player player = repository.getPlayerSync();
+            if (player != null) {
+                player.setHeroClass(heroClass);
+                repository.updatePlayer(player);
+            }
+        });
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();
