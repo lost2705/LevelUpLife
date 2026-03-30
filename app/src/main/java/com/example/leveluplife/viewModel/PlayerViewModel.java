@@ -172,6 +172,22 @@ public class PlayerViewModel extends AndroidViewModel {
             Player player = repository.getPlayerSync();
             if (player != null) {
                 player.setHeroClass(heroClass);
+
+                switch (heroClass) {
+                    case "Warrior":
+                        player.setMaxHp((int)(player.getMaxHp() * 1.2));
+                        player.setCurrentHp(player.getMaxHp());
+                        player.setStrength(player.getStrength() + 3);
+                        break;
+                    case "Mage":
+                        player.setMaxMana((int)(player.getMaxMana() * 1.2));
+                        player.setCurrentMana(player.getMaxMana());
+                        player.setIntelligence(player.getIntelligence() + 3);
+                        break;
+                    case "Ranger":
+                        player.setDexterity((int)(player.getDexterity() * 1.2));
+                        break;
+                }
                 repository.updatePlayer(player);
             }
         });

@@ -431,20 +431,19 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_level_up, null);
 
-        TextView tvLevelUp      = dialogView.findViewById(R.id.tv_level_up);
-        TextView tvLevelNumber  = dialogView.findViewById(R.id.tv_level_number);
+        TextView tvLevelUp = dialogView.findViewById(R.id.tv_level_up);
+        TextView tvLevelNumber = dialogView.findViewById(R.id.tv_level_number);
         TextView tvTalentPoints = dialogView.findViewById(R.id.tv_talent_points);
-        TextView tvMaxHp        = dialogView.findViewById(R.id.tv_max_hp);
-        TextView tvMaxMana      = dialogView.findViewById(R.id.tv_max_mana);
+        TextView tvMaxHp = dialogView.findViewById(R.id.tv_max_hp);
+        TextView tvMaxMana = dialogView.findViewById(R.id.tv_max_mana);
         android.widget.Button btnAwesome = dialogView.findViewById(R.id.btn_awesome);
         KonfettiView konfettiView = dialogView.findViewById(R.id.konfettiView);
 
-        if (tvLevelUp != null)      tvLevelUp.setText("🎉 LEVEL UP! 🎉");
+        if (tvLevelUp != null) tvLevelUp.setText("🎉 LEVEL UP! 🎉");
         if (tvLevelNumber != null)  tvLevelNumber.setText("You reached Level " + event.newLevel + "!");
-        if (tvTalentPoints != null) tvTalentPoints.setText("⭐ +" + event.talentPoints +
-                " Talent Point" + (event.talentPoints > 1 ? "s" : ""));
-        if (tvMaxHp != null)        tvMaxHp.setText("❤️ Max HP +" + event.getHpGain());
-        if (tvMaxMana != null)      tvMaxMana.setText("💙 Max Mana +" + event.getManaGain());
+        if (tvTalentPoints != null) tvTalentPoints.setText("⭐ +" + event.talentPoints + " Talent Point" + (event.talentPoints > 1 ? "s" : ""));
+        if (tvMaxHp != null) tvMaxHp.setText("❤️ Max HP +" + event.getHpGain());
+        if (tvMaxMana != null) tvMaxMana.setText("💙 Max Mana +" + event.getManaGain());
 
         builder.setView(dialogView);
         AlertDialog dialog = builder.create();
@@ -454,7 +453,16 @@ public class MainActivity extends AppCompatActivity {
             dialog.getWindow().getAttributes().windowAnimations = R.style.LevelUpDialogAnimation;
         }
 
-        if (btnAwesome != null) btnAwesome.setOnClickListener(v -> dialog.dismiss());
+        if (btnAwesome != null) btnAwesome.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (event.newLevel == 10) {
+                Player player = playerViewModel.getPlayer().getValue();
+                if (player != null && player.getHeroClass() == null) {
+                    new Handler(Looper.getMainLooper()).postDelayed(
+                            () -> showClassSelectionDialog(), 300);
+                }
+            }
+        });
         dialog.show();
 
         if (tvLevelUp != null) {
@@ -547,6 +555,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void showClassSelectionDialog() {
+        View view = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_class_selection, null);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(view)
+                .setCancelable(false)
+                .create();
+
+        if (dialog.getWindow() != null)
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        view.findViewById(R.id.cardWarrior).setOnClickListener(v ->
+                onClassSelected("Warrior", dialog));
+        view.findViewById(R.id.cardMage).setOnClickListener(v ->
+                onClassSelected("Mage", dialog));
+        view.findViewById(R.id.cardRanger).setOnClickListener(v ->
+                onClassSelected("Ranger", dialog));
+
+        dialog.show();
+    }
+
+    private void onClassSelected(String heroClass, AlertDialog dialog) {
+        dialog.dismiss();
+        playerViewModel.setHeroClass(heroClass);
+        soundManager.playLevelUp();
+
+        String emoji = heroClass.equals("Warrior") ? "⚔️" :
+                heroClass.equals("Mage")    ? "🧙" : "🏹";
+
+        Snackbar.make(
+                findViewById(android.R.id.content),
+                emoji + " You are now a " + heroClass + "!",
+                Snackbar.LENGTH_LONG
+        ).show();
+    }
 
     @Override
     protected void onDestroy() {
