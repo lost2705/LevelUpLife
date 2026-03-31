@@ -118,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
             updateEmptyState(tasks);
         });
 
-
         playerViewModel.getPlayer().observe(this, player -> {
             if (player != null) updatePlayerUI(player);
         });
@@ -151,22 +150,26 @@ public class MainActivity extends AppCompatActivity {
                 Player player = playerViewModel.getPlayer().getValue();
                 int penalty = (player != null) ? player.getXpPenalty() : 0;
 
+                int baseXp = task.getXpReward();
+                int xpWithClassBonus = applyClassBonus(baseXp, task, player);
+                int finalXp = xpWithClassBonus;
+
                 if (penalty > 0) {
-                    int baseXp = task.getXpReward();
-                    int actualXp = baseXp * (100 - penalty) / 100;
-                    int reduction = baseXp - actualXp;
+                    finalXp = xpWithClassBonus * (100 - penalty) / 100;
+                    int reduction = xpWithClassBonus - finalXp;
                     Snackbar.make(findViewById(android.R.id.content),
-                                    "+" + actualXp + " XP (⚠️ -" + reduction + " penalty), +" + task.getGoldReward() + " Gold",
+                                    "+" + finalXp + " XP (⚠️ -" + reduction + " penalty), +" +
+                                            task.getGoldReward() + " Gold",
                                     Snackbar.LENGTH_LONG)
                             .setBackgroundTint(getResources().getColor(android.R.color.holo_orange_dark))
                             .show();
                 } else {
                     Snackbar.make(findViewById(android.R.id.content),
-                            "✅ +" + task.getXpReward() + " XP, +" + task.getGoldReward() + " Gold",
+                            "✅ +" + finalXp + " XP, +" + task.getGoldReward() + " Gold",
                             Snackbar.LENGTH_SHORT).show();
                 }
 
-                playerViewModel.addXp(task.getXpReward());
+                playerViewModel.addXp(finalXp);
                 playerViewModel.addGold(task.getGoldReward());
                 soundManager.playTaskComplete();
 
@@ -242,8 +245,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, SettingsActivity.class));
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
-
-
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -455,14 +456,14 @@ public class MainActivity extends AppCompatActivity {
 
         if (btnAwesome != null) btnAwesome.setOnClickListener(v -> {
             dialog.dismiss();
-            if (event.newLevel == 10) {
-                Player player = playerViewModel.getPlayer().getValue();
-                if (player != null && player.getHeroClass() == null) {
-                    new Handler(Looper.getMainLooper()).postDelayed(
-                            () -> showClassSelectionDialog(), 300);
-                }
+
+            Player player = playerViewModel.getPlayer().getValue();
+            if (event.newLevel >= 10 && player != null && player.getHeroClass() == null) {
+                new Handler(Looper.getMainLooper()).postDelayed(
+                        this::showClassSelectionDialog, 300);
             }
         });
+
         dialog.show();
 
         if (tvLevelUp != null) {
@@ -503,7 +504,6 @@ public class MainActivity extends AppCompatActivity {
             updateEmptyState(tasks);
         });
     }
-
 
     private void showAchievementUnlockedDialog(Achievement achievement) {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -556,6 +556,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showClassSelectionDialog() {
+        Player player = playerViewModel.getPlayer().getValue();
+        if (player != null && player.getHeroClass() != null) {
+            return;
+        }
+
         View view = LayoutInflater.from(this)
                 .inflate(R.layout.dialog_class_selection, null);
 
@@ -590,6 +595,42 @@ public class MainActivity extends AppCompatActivity {
                 emoji + " You are now a " + heroClass + "!",
                 Snackbar.LENGTH_LONG
         ).show();
+    }
+
+    private int applyClassBonus(int baseXp, Task task, Player player) {
+        if (player == null || player.getHeroClass() == null) return baseXp;
+
+        String heroClass = player.getHeroClass();
+        int xp = baseXp;
+
+        try {
+            Task.AttributeType attr = task.getAttributeType();
+            Task.TaskType type = task.getTaskType();
+
+            switch (heroClass) {
+                case "Warrior":
+                    if (attr == Task.AttributeType.STRENGTH) {
+                        xp = (int) Math.round(baseXp * 1.10);
+                    }
+                    break;
+
+                case "Mage":
+                    if (attr == Task.AttributeType.INTELLIGENCE) {
+                        xp = (int) Math.round(baseXp * 1.10);
+                    }
+                    break;
+
+                case "Ranger":
+                    if (type == Task.TaskType.DAILY) {
+                        xp = (int) Math.round(baseXp * 1.10);
+                    }
+                    break;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "applyClassBonus error", e);
+        }
+
+        return xp;
     }
 
     @Override
