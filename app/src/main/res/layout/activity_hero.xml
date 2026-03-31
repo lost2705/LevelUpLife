@@ -46,6 +46,17 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HERO PROFILE"
+                android:textSize="11sp"
+                android:textColor="#BB86FC"
+                android:textStyle="bold"
+                android:letterSpacing="0.15"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="4dp"/>
+
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -63,13 +74,13 @@
 
                     <TextView
                         android:id="@+id/tvHeroAvatar"
-                        android:layout_width="88dp"
-                        android:layout_height="88dp"
+                        android:layout_width="96dp"
+                        android:layout_height="96dp"
                         android:text="🧙"
-                        android:textSize="48sp"
+                        android:textSize="52sp"
                         android:gravity="center"
                         android:background="@drawable/attribute_icon_bg"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginBottom="14dp"/>
 
                     <TextView
                         android:id="@+id/tvHeroName"
@@ -77,7 +88,7 @@
                         android:layout_height="wrap_content"
                         android:text="Hero"
                         android:textColor="#FFFFFF"
-                        android:textSize="24sp"
+                        android:textSize="26sp"
                         android:textStyle="bold"/>
 
                     <TextView
@@ -87,7 +98,53 @@
                         android:text="Level 1 • Adventurer"
                         android:textColor="#BB86FC"
                         android:textSize="14sp"
-                        android:layout_marginTop="4dp"/>
+                        android:layout_marginTop="6dp"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CLASS BONUS"
+                android:textSize="11sp"
+                android:textColor="#BB86FC"
+                android:textStyle="bold"
+                android:letterSpacing="0.15"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="4dp"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#2A2A2A"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvClassBonusTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Class Locked"
+                        android:textColor="#888888"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/tvClassBonusDescription"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Unlock class selection at Level 10"
+                        android:textColor="#CCCCCC"
+                        android:textSize="14sp"
+                        android:layout_marginTop="6dp"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -270,12 +327,14 @@
                                 android:layout_height="wrap_content"
                                 android:text="💪"
                                 android:textSize="18sp"/>
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text=" STR"
                                 android:textColor="#888888"
                                 android:textSize="14sp"/>
+
                             <TextView
                                 android:id="@+id/tvStrength"
                                 android:layout_width="wrap_content"
@@ -285,6 +344,53 @@
                                 android:textSize="16sp"
                                 android:textStyle="bold"/>
                         </LinearLayout>
+
+                        <!-- Внутри activity_hero.xml -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardHero"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="16dp"
+                            app:cardCornerRadius="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="16dp">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical">
+
+                                    <TextView
+                                        android:id="@+id/tvClassEmoji"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:textSize="28sp"
+                                        android:text="❓"
+                                        android:paddingEnd="8dp"/>
+
+                                    <TextView
+                                        android:id="@+id/tvHeroClass"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="No class chosen"
+                                        android:textSize="20sp"
+                                        android:textStyle="bold"/>
+                                </LinearLayout>
+
+                                <TextView
+                                    android:id="@+id/tvClassBonus"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:text="Reach level 10 to choose your class!"
+                                    android:textSize="14sp"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -298,12 +404,14 @@
                                 android:layout_height="wrap_content"
                                 android:text="🧠"
                                 android:textSize="18sp"/>
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text=" INT"
                                 android:textColor="#888888"
                                 android:textSize="14sp"/>
+
                             <TextView
                                 android:id="@+id/tvIntelligence"
                                 android:layout_width="wrap_content"
@@ -334,12 +442,14 @@
                                 android:layout_height="wrap_content"
                                 android:text="⚡"
                                 android:textSize="18sp"/>
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text=" DEX"
                                 android:textColor="#888888"
                                 android:textSize="14sp"/>
+
                             <TextView
                                 android:id="@+id/tvDexterity"
                                 android:layout_width="wrap_content"
@@ -362,12 +472,14 @@
                                 android:layout_height="wrap_content"
                                 android:text="❤️"
                                 android:textSize="18sp"/>
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text=" HP"
                                 android:textColor="#888888"
                                 android:textSize="14sp"/>
+
                             <TextView
                                 android:id="@+id/tvHp"
                                 android:layout_width="wrap_content"
@@ -397,12 +509,14 @@
                                 android:layout_height="wrap_content"
                                 android:text="💙"
                                 android:textSize="18sp"/>
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text=" MANA"
                                 android:textColor="#888888"
                                 android:textSize="14sp"/>
+
                             <TextView
                                 android:id="@+id/tvMana"
                                 android:layout_width="wrap_content"
@@ -425,12 +539,14 @@
                                 android:layout_height="wrap_content"
                                 android:text="💰"
                                 android:textSize="18sp"/>
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text=" Gold"
                                 android:textColor="#888888"
                                 android:textSize="14sp"/>
+
                             <TextView
                                 android:id="@+id/tvGold"
                                 android:layout_width="wrap_content"
