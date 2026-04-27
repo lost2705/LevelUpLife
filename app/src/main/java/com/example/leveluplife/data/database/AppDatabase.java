@@ -21,7 +21,7 @@ import com.example.leveluplife.data.entity.Task;
 
 @Database(
         entities = {Task.class, Player.class, CompletedTask.class, Achievement.class, ShopItem.class},
-        version = 9,
+        version = 10,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -51,7 +51,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     Migrations.MIGRATION_5_6,
                                     Migrations.MIGRATION_6_7,
                                     Migrations.MIGRATION_7_8,
-                                    Migrations.MIGRATION_8_9
+                                    Migrations.MIGRATION_8_9,
+                                    Migrations.MIGRATION_9_10
                             )
                             .addCallback(new RoomDatabase.Callback() {
                                 @Override
@@ -74,16 +75,20 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static void seedAchievements(AppDatabase db) {
         db.achievementDao().insertAchievements(
-                new Achievement(1,  "First Blood",      "Complete your first task",                  "⚔️",  100,  50),
-                new Achievement(2,  "Daily Routine",    "Complete 7 daily tasks in a row",           "📅",  250, 100),
-                new Achievement(3,  "Level Up!",        "Reach Level 5",                             "⭐",  500, 200),
-                new Achievement(4,  "Gold Rush",        "Earn 1000 gold",                            "💰",  300, 150),
-                new Achievement(5,  "Task Master",      "Complete 50 tasks",                         "🎯",  400, 200),
-                new Achievement(6,  "Perfect Day",      "Complete all daily tasks 5 days in a row",  "✅",  600, 300),
-                new Achievement(7,  "Level Master",     "Reach Level 10",                            "👑", 1000, 500),
-                new Achievement(8,  "Wealthy",          "Earn 5000 gold",                            "🏦",  700, 400),
-                new Achievement(9,  "Strength Builder", "Put 10 points into Strength",               "💪",  350, 175),
-                new Achievement(10, "Balanced",         "Put points into all 5 attributes",          "⚖️",  800, 400)
+                new Achievement(1,  "First Blood",        "Complete your first task",                  "⚔️",  100,  50),
+                new Achievement(2,  "Daily Routine",      "Complete 7 daily tasks in a row",           "📅",  250, 100),
+                new Achievement(3,  "Level Up!",          "Reach Level 5",                             "⭐",  500, 200),
+                new Achievement(4,  "Gold Rush",          "Earn 1000 gold",                            "💰",  300, 150),
+                new Achievement(5,  "Task Master",        "Complete 50 tasks",                         "🎯",  400, 200),
+                new Achievement(6,  "Perfect Day",        "Complete all daily tasks 5 days in a row",  "✅",  600, 300),
+                new Achievement(7,  "Level Master",       "Reach Level 10",                            "👑", 1000, 500),
+                new Achievement(8,  "Wealthy",            "Earn 5000 gold",                            "🏦",  700, 400),
+                new Achievement(9,  "Strength Builder",   "Put 10 points into Strength",               "💪",  350, 175),
+                new Achievement(10, "Balanced",           "Put points into all attributes",            "⚖️",  800, 400),
+                new Achievement(11, "Destiny's Call",     "Choose your class and begin your journey",  "⚡",  200, 100),
+                new Achievement(12, "Iron Will",          "Become a Warrior — master of strength",     "⚔️",  300, 150),
+                new Achievement(13, "Ancient Knowledge",  "Become a Mage — seeker of wisdom",          "🧙",  300, 150),
+                new Achievement(14, "Shadow Step",        "Become a Ranger — guardian of consistency", "🏹",  300, 150)
         );
     }
 

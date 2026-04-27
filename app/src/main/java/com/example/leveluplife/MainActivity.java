@@ -152,10 +152,11 @@ public class MainActivity extends AppCompatActivity {
 
                 int baseXp = task.getXpReward();
                 int xpWithClassBonus = applyClassBonus(baseXp, task, player);
-                int finalXp = xpWithClassBonus;
+                int xpWithBoost = applyXpBoost(xpWithClassBonus);  // 👈 новая строка
+                int finalXp = xpWithBoost;
 
                 if (penalty > 0) {
-                    finalXp = xpWithClassBonus * (100 - penalty) / 100;
+                    finalXp = xpWithBoost * (100 - penalty) / 100;
                     int reduction = xpWithClassBonus - finalXp;
                     Snackbar.make(findViewById(android.R.id.content),
                                     "+" + finalXp + " XP (⚠️ -" + reduction + " penalty), +" +
@@ -630,6 +631,21 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "applyClassBonus error", e);
         }
 
+        return xp;
+    }
+
+    private int applyXpBoost(int xp) {
+        SharedPreferences prefs = getSharedPreferences("shop_effects", MODE_PRIVATE);
+        boolean boostActive = prefs.getBoolean("xp_boost_active", false);
+        if (boostActive) {
+            prefs.edit().putBoolean("xp_boost_active", false).apply();
+            Snackbar.make(findViewById(android.R.id.content),
+                            "⚡ XP Boost activated! x2 XP this task!",
+                            Snackbar.LENGTH_SHORT)
+                    .setBackgroundTint(0xFF448AFF)
+                    .show();
+            return xp * 2;
+        }
         return xp;
     }
 

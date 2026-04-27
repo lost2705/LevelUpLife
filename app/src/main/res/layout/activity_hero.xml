@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:background="#1E1E1E">
 
+    <!-- Toolbar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -33,7 +34,6 @@
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold"/>
-
     </LinearLayout>
 
     <ScrollView
@@ -46,6 +46,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- HERO PROFILE -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -99,10 +100,10 @@
                         android:textColor="#BB86FC"
                         android:textSize="14sp"
                         android:layout_marginTop="6dp"/>
-
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- CLASS BONUS -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -132,7 +133,7 @@
                         android:id="@+id/tvClassBonusTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Class Locked"
+                        android:text="🔒 Class Locked"
                         android:textColor="#888888"
                         android:textSize="16sp"
                         android:textStyle="bold"/>
@@ -141,14 +142,15 @@
                         android:id="@+id/tvClassBonusDescription"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Unlock class selection at Level 10"
+                        android:text="Reach Level 10 to unlock class selection"
                         android:textColor="#CCCCCC"
                         android:textSize="14sp"
-                        android:layout_marginTop="6dp"/>
-
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- EQUIPMENT -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -203,7 +205,6 @@
                             android:text="— Empty —"
                             android:textColor="#555555"
                             android:textSize="13sp"/>
-
                     </LinearLayout>
 
                     <View
@@ -241,7 +242,6 @@
                             android:text="— Empty —"
                             android:textColor="#555555"
                             android:textSize="13sp"/>
-
                     </LinearLayout>
 
                     <View
@@ -279,12 +279,11 @@
                             android:text="— Empty —"
                             android:textColor="#555555"
                             android:textSize="13sp"/>
-
                     </LinearLayout>
-
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- STATS -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -309,6 +308,7 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <!-- STR + INT -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -345,53 +345,6 @@
                                 android:textStyle="bold"/>
                         </LinearLayout>
 
-                        <!-- Внутри activity_hero.xml -->
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/cardHero"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="16dp"
-                            app:cardCornerRadius="16dp">
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="16dp">
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:gravity="center_vertical">
-
-                                    <TextView
-                                        android:id="@+id/tvClassEmoji"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textSize="28sp"
-                                        android:text="❓"
-                                        android:paddingEnd="8dp"/>
-
-                                    <TextView
-                                        android:id="@+id/tvHeroClass"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="No class chosen"
-                                        android:textSize="20sp"
-                                        android:textStyle="bold"/>
-                                </LinearLayout>
-
-                                <TextView
-                                    android:id="@+id/tvClassBonus"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:text="Reach level 10 to choose your class!"
-                                    android:textSize="14sp"/>
-                            </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
-
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -421,9 +374,9 @@
                                 android:textSize="16sp"
                                 android:textStyle="bold"/>
                         </LinearLayout>
-
                     </LinearLayout>
 
+                    <!-- DEX + HP -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -489,9 +442,9 @@
                                 android:textSize="16sp"
                                 android:textStyle="bold"/>
                         </LinearLayout>
-
                     </LinearLayout>
 
+                    <!-- MANA + GOLD -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -556,7 +509,6 @@
                                 android:textSize="16sp"
                                 android:textStyle="bold"/>
                         </LinearLayout>
-
                     </LinearLayout>
 
                 </LinearLayout>

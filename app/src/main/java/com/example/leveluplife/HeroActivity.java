@@ -25,80 +25,25 @@ public class HeroActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
-        tvHeroName = findViewById(R.id.tvHeroName);
-        tvHeroClass = findViewById(R.id.tvHeroClass);
-        tvHeroAvatar = findViewById(R.id.tvHeroAvatar);
-        tvStrength = findViewById(R.id.tvStrength);
-        tvIntelligence = findViewById(R.id.tvIntelligence);
-        tvDexterity = findViewById(R.id.tvDexterity);
-        tvHp = findViewById(R.id.tvHp);
-        tvMana = findViewById(R.id.tvMana);
-        tvGold = findViewById(R.id.tvGold);
-        tvClassBonusTitle = findViewById(R.id.tvClassBonusTitle);
+        tvHeroName           = findViewById(R.id.tvHeroName);
+        tvHeroClass          = findViewById(R.id.tvHeroClass);
+        tvHeroAvatar         = findViewById(R.id.tvHeroAvatar);
+        tvStrength           = findViewById(R.id.tvStrength);
+        tvIntelligence       = findViewById(R.id.tvIntelligence);
+        tvDexterity          = findViewById(R.id.tvDexterity);
+        tvHp                 = findViewById(R.id.tvHp);
+        tvMana               = findViewById(R.id.tvMana);
+        tvGold               = findViewById(R.id.tvGold);
+        tvClassBonusTitle    = findViewById(R.id.tvClassBonusTitle);
         tvClassBonusDescription = findViewById(R.id.tvClassBonusDescription);
 
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         playerViewModel.getPlayer().observe(this, player -> {
             if (player == null) return;
 
-            String name = player.getHeroName() != null && !player.getHeroName().trim().isEmpty()
-                    ? player.getHeroName()
-                    : "Hero";
+            String name = (player.getHeroName() != null && !player.getHeroName().trim().isEmpty())
+                    ? player.getHeroName() : "Hero";
             tvHeroName.setText(name);
-
-            String heroClass = player.getHeroClass();
-            if (heroClass != null) {
-                tvHeroClass.setText("Level " + player.getLevel() + " • " + heroClass);
-
-                switch (heroClass) {
-                    case "Warrior":
-                        tvHeroAvatar.setText("⚔️");
-                        tvHeroClass.setTextColor(Color.parseColor("#FF5252"));
-                        tvClassBonusTitle.setText("Warrior Bonus");
-                        tvClassBonusTitle.setTextColor(Color.parseColor("#FF5252"));
-                        tvClassBonusDescription.setText("+20% Max HP • +3 Strength");
-                        break;
-
-                    case "Mage":
-                        tvHeroAvatar.setText("🧙");
-                        tvHeroClass.setTextColor(Color.parseColor("#448AFF"));
-                        tvClassBonusTitle.setText("Mage Bonus");
-                        tvClassBonusTitle.setTextColor(Color.parseColor("#448AFF"));
-                        tvClassBonusDescription.setText("+20% Max Mana • +3 Intelligence");
-                        break;
-
-                    case "Ranger":
-                        tvHeroAvatar.setText("🏹");
-                        tvHeroClass.setTextColor(Color.parseColor("#4CAF50"));
-                        tvClassBonusTitle.setText("Ranger Bonus");
-                        tvClassBonusTitle.setTextColor(Color.parseColor("#4CAF50"));
-                        tvClassBonusDescription.setText("+20% Dexterity • Agile build");
-                        break;
-
-                    default:
-                        tvHeroAvatar.setText("🧙");
-                        tvHeroClass.setTextColor(Color.parseColor("#BB86FC"));
-                        tvClassBonusTitle.setText("Class Bonus");
-                        tvClassBonusTitle.setTextColor(Color.parseColor("#BB86FC"));
-                        tvClassBonusDescription.setText("Your class bonus will appear here");
-                        break;
-                }
-
-            } else if (player.getLevel() >= 10) {
-                tvHeroClass.setText("Level " + player.getLevel() + " • Choose your class!");
-                tvHeroClass.setTextColor(Color.parseColor("#FFD700"));
-                tvHeroAvatar.setText("❓");
-                tvClassBonusTitle.setText("Class Awakening");
-                tvClassBonusTitle.setTextColor(Color.parseColor("#FFD700"));
-                tvClassBonusDescription.setText("Reach your destiny and choose a class");
-            } else {
-                tvHeroClass.setText("Level " + player.getLevel() + " • Adventurer");
-                tvHeroClass.setTextColor(Color.parseColor("#BB86FC"));
-                tvHeroAvatar.setText("🧙");
-                tvClassBonusTitle.setText("Class Locked");
-                tvClassBonusTitle.setTextColor(Color.parseColor("#888888"));
-                tvClassBonusDescription.setText("Unlock class selection at Level 10");
-            }
 
             tvStrength.setText(" " + player.getStrength());
             tvIntelligence.setText(" " + player.getIntelligence());
@@ -106,7 +51,79 @@ public class HeroActivity extends AppCompatActivity {
             tvHp.setText(" " + player.getCurrentHp() + "/" + player.getMaxHp());
             tvMana.setText(" " + player.getCurrentMana() + "/" + player.getMaxMana());
             tvGold.setText(" " + player.getGold());
+
+            String heroClass = player.getHeroClass();
+
+            if (heroClass != null) {
+                tvHeroClass.setText("Level " + player.getLevel() + " • " + heroClass);
+                applyClassUI(heroClass);
+
+            } else if (player.getLevel() >= 10) {
+                tvHeroAvatar.setText("❓");
+                tvHeroClass.setText("Level " + player.getLevel() + " • Choose your class!");
+                tvHeroClass.setTextColor(Color.parseColor("#FFD700"));
+                tvClassBonusTitle.setText("⚡ Class Awakening");
+                tvClassBonusTitle.setTextColor(Color.parseColor("#FFD700"));
+                tvClassBonusDescription.setText("You've reached Level 10!\nReturn to the main screen to claim your destiny.");
+
+            } else {
+                tvHeroAvatar.setText("🗡️");
+                tvHeroClass.setText("Level " + player.getLevel() + " • Adventurer");
+                tvHeroClass.setTextColor(Color.parseColor("#BB86FC"));
+                tvClassBonusTitle.setText("🔒 Class Locked");
+                tvClassBonusTitle.setTextColor(Color.parseColor("#888888"));
+                tvClassBonusDescription.setText("Reach Level 10 to unlock class selection.\n"
+                        + (10 - player.getLevel()) + " levels to go!");
+            }
         });
+    }
+
+    private void applyClassUI(String heroClass) {
+        switch (heroClass) {
+            case "Warrior":
+                tvHeroAvatar.setText("⚔️");
+                tvHeroClass.setTextColor(Color.parseColor("#FF5252"));
+                tvClassBonusTitle.setText("⚔️ Warrior Bonus");
+                tvClassBonusTitle.setTextColor(Color.parseColor("#FF5252"));
+                tvClassBonusDescription.setText(
+                        "• +10% XP on all Strength tasks\n" +
+                                "• Physical discipline is your path\n" +
+                                "• Every rep brings you closer to legend"
+                );
+                break;
+
+            case "Mage":
+                tvHeroAvatar.setText("🧙");
+                tvHeroClass.setTextColor(Color.parseColor("#448AFF"));
+                tvClassBonusTitle.setText("🧙 Mage Bonus");
+                tvClassBonusTitle.setTextColor(Color.parseColor("#448AFF"));
+                tvClassBonusDescription.setText(
+                        "• +10% XP on all Intelligence tasks\n" +
+                                "• Knowledge is the greatest weapon\n" +
+                                "• Every lesson levels your power"
+                );
+                break;
+
+            case "Ranger":
+                tvHeroAvatar.setText("🏹");
+                tvHeroClass.setTextColor(Color.parseColor("#4CAF50"));
+                tvClassBonusTitle.setText("🏹 Ranger Bonus");
+                tvClassBonusTitle.setTextColor(Color.parseColor("#4CAF50"));
+                tvClassBonusDescription.setText(
+                        "• +10% XP on all Daily tasks\n" +
+                                "• Consistency is your superpower\n" +
+                                "• Show up every day, win every week"
+                );
+                break;
+
+            default:
+                tvHeroAvatar.setText("🧙");
+                tvHeroClass.setTextColor(Color.parseColor("#BB86FC"));
+                tvClassBonusTitle.setText("Class Bonus");
+                tvClassBonusTitle.setTextColor(Color.parseColor("#BB86FC"));
+                tvClassBonusDescription.setText("Your class bonus will appear here");
+                break;
+        }
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.example.leveluplife;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +48,20 @@ public class ShopActivity extends AppCompatActivity {
             }
         });
 
+        // Показываем статус XP Boost
+        updateBoostIndicator();
+
+        viewModel.getPurchaseResult().observe(this, result -> {
+            if (result == null) return;
+            if ("NOT_ENOUGH_GOLD".equals(result)) {
+                Toast.makeText(this, "❌ Not enough gold!", Toast.LENGTH_SHORT).show();
+            } else if (result.startsWith("SUCCESS:")) {
+                String itemName = result.substring(8);
+                Toast.makeText(this, "✅ Purchased: " + itemName, Toast.LENGTH_SHORT).show();
+                updateBoostIndicator(); // 👈 обновить после покупки
+            }
+        });
+
         viewModel.getPurchaseResult().observe(this, result -> {
             if (result == null) return;
             if ("NOT_ENOUGH_GOLD".equals(result)) {
@@ -55,6 +71,16 @@ public class ShopActivity extends AppCompatActivity {
                 Toast.makeText(this, "✅ Purchased: " + itemName, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void updateBoostIndicator() {
+        SharedPreferences prefs = getSharedPreferences("shop_effects", MODE_PRIVATE);
+        boolean active = prefs.getBoolean("xp_boost_active", false);
+        TextView tvBoostStatus = findViewById(R.id.tv_boost_status);
+        if (tvBoostStatus != null) {
+            tvBoostStatus.setVisibility(active ? View.VISIBLE : View.GONE);
+            tvBoostStatus.setText("⚡ XP Boost active — next task gives x2 XP!");
+        }
     }
 
     @Override
