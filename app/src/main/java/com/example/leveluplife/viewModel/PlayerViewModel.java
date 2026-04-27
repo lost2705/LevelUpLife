@@ -136,6 +136,17 @@ public class PlayerViewModel extends AndroidViewModel {
                 return player.getStrength()     > 5
                         && player.getIntelligence() > 5
                         && player.getDexterity()    > 5;
+            case 11: // Destiny's Call — любой класс выбран
+                return player.getHeroClass() != null;
+
+            case 12: // Iron Will — Warrior
+                return "Warrior".equals(player.getHeroClass());
+
+            case 13: // Ancient Knowledge — Mage
+                return "Mage".equals(player.getHeroClass());
+
+            case 14: // Shadow Step — Ranger
+                return "Ranger".equals(player.getHeroClass());
             default:
                 return false;
         }
@@ -189,6 +200,7 @@ public class PlayerViewModel extends AndroidViewModel {
                         break;
                 }
                 repository.updatePlayer(player);
+                checkAchievements();
             }
         });
     }

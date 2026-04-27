@@ -113,6 +113,18 @@ public class Migrations {
         }
     };
 
+    public static final Migration MIGRATION_9_10 = new Migration(9, 10) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("INSERT OR IGNORE INTO achievements " +
+                    "(id, title, description, icon, rewardXp, rewardGold, unlocked, unlockedAt) VALUES " +
+                    "(11, 'Destiny''s Call',    'Choose your class and begin your true journey', '⚡', 200, 100, 0, 0)," +
+                    "(12, 'Iron Will',          'Become a Warrior — master of strength',         '⚔️', 300, 150, 0, 0)," +
+                    "(13, 'Ancient Knowledge',  'Become a Mage — seeker of wisdom and power',    '🧙', 300, 150, 0, 0)," +
+                    "(14, 'Shadow Step',        'Become a Ranger — guardian of consistency',     '🏹', 300, 150, 0, 0)");
+        }
+    };
+
     public static final Migration MIGRATION_8_9 = new Migration(8, 9) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {

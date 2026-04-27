@@ -48,6 +48,20 @@
         android:background="#FFD700"
         android:alpha="0.3"/>
 
+    <TextView
+        android:id="@+id/tv_boost_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:background="#1A448AFF"
+        android:padding="12dp"
+        android:layout_margin="16dp"
+        android:gravity="center"
+        android:text="⚡ XP Boost active — next task gives x2 XP!"
+        android:textColor="#448AFF"
+        android:textSize="13sp"
+        android:textStyle="bold"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_shop"
         android:layout_width="match_parent"
