@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,6 +20,13 @@ public class SettingsActivity extends AppCompatActivity {
     private SharedPreferences prefs;
 
     private static final String PREF_NOTIFICATIONS = "notifications_enabled";
+    private static final String PREF_HP_BAR_COLOR = "hp_bar_color";
+    private static final String PREF_MANA_BAR_COLOR = "mana_bar_color";
+    private static final String PREF_XP_BAR_COLOR = "xp_bar_color";
+
+    private static final int DEFAULT_HP_COLOR = 0xFFFF5252;
+    private static final int DEFAULT_MANA_COLOR = 0xFF448AFF;
+    private static final int DEFAULT_XP_COLOR = 0xFFFFD700;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +39,8 @@ public class SettingsActivity extends AppCompatActivity {
         setupBackButton();
         setupSoundToggle();
         setupNotificationsToggle();
+        setupBarColorCustomization();
+        setupAdminPanel();
         setupResetProgress();
     }
 
@@ -45,7 +55,6 @@ public class SettingsActivity extends AppCompatActivity {
 
         switchSound.setOnCheckedChangeListener((buttonView, isChecked) -> {
             soundManager.setSoundEnabled(isChecked);
-            // Play confirmation sound when enabling
             if (isChecked) {
                 soundManager.playTaskComplete();
             }
@@ -61,8 +70,77 @@ public class SettingsActivity extends AppCompatActivity {
         );
     }
 
+    private void setupBarColorCustomization() {
+        LinearLayout btnBarColors = findViewById(R.id.btnBarColors);
+        if (btnBarColors == null) return;
+
+        btnBarColors.setOnClickListener(v -> {
+            String[] options = {
+                    "❤️ HP Bar",
+                    "💙 Mana Bar",
+                    "✨ XP Bar"
+            };
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Choose bar to customize")
+                    .setItems(options, (dialog, which) -> {
+                        if (which == 0) {
+                            showColorPickerDialog("HP Bar", PREF_HP_BAR_COLOR, DEFAULT_HP_COLOR);
+                        } else if (which == 1) {
+                            showColorPickerDialog("Mana Bar", PREF_MANA_BAR_COLOR, DEFAULT_MANA_COLOR);
+                        } else if (which == 2) {
+                            showColorPickerDialog("XP Bar", PREF_XP_BAR_COLOR, DEFAULT_XP_COLOR);
+                        }
+                    })
+                    .show();
+        });
+    }
+
+    private void showColorPickerDialog(String title, String prefKey, int defaultColor) {
+        String[] colorNames = {
+                "🔴 Red",
+                "🟢 Green",
+                "🔵 Blue",
+                "🟣 Purple",
+                "🟡 Gold",
+                "🟠 Orange",
+                "🩷 Pink",
+                "🔄 Reset to default"
+        };
+
+        int[] colorValues = {
+                0xFFFF5252,
+                0xFF4CAF50,
+                0xFF448AFF,
+                0xFFBB86FC,
+                0xFFFFD700,
+                0xFFFF9800,
+                0xFFE91E63,
+                defaultColor
+        };
+
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setItems(colorNames, (dialog, which) -> {
+                    prefs.edit().putInt(prefKey, colorValues[which]).apply();
+                    soundManager.playTaskComplete();
+                })
+                .show();
+    }
+
+    private void setupAdminPanel() {
+        LinearLayout btnAdminPanel = findViewById(R.id.btnAdminPanel);
+        if (btnAdminPanel == null) return;
+
+        btnAdminPanel.setOnClickListener(v -> {
+            startActivity(new Intent(this, AdminActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+    }
+
     private void setupResetProgress() {
         LinearLayout btnReset = findViewById(R.id.btnResetProgress);
+        if (btnReset == null) return;
 
         btnReset.setOnClickListener(v ->
                 new AlertDialog.Builder(this)

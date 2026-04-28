@@ -68,19 +68,11 @@ public class PlayerRepository {
         executor.execute(() -> {
             Player currentPlayer = playerDao.getPlayerSync();
             if (currentPlayer != null) {
-                int penalty = currentPlayer.getXpPenalty();
-                int actualXp = baseXp * (100 - penalty) / 100;
 
                 Log.d(TAG, "💰 XP Reward:");
-                Log.d(TAG, "   Base XP: " + baseXp);
-                if (penalty > 0) {
-                    Log.d(TAG, "   ⚠️ Penalty: -" + penalty + "%");
-                    Log.d(TAG, "   Actual XP: " + actualXp + " (reduced by " + (baseXp - actualXp) + ")");
-                } else {
-                    Log.d(TAG, "   Actual XP: " + actualXp);
-                }
+                Log.d(TAG, " Final XP received: " + baseXp);
 
-                currentPlayer.setCurrentXp(currentPlayer.getCurrentXp() + actualXp);
+                currentPlayer.setCurrentXp(currentPlayer.getCurrentXp() + baseXp);
 
                 while (currentPlayer.getCurrentXp() >= currentPlayer.getXpToNextLevel()) {
                     int oldMaxHp = currentPlayer.getMaxHp();

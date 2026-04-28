@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.leveluplife.data.entity.Task;
 import com.example.leveluplife.data.repository.TaskRepository;
@@ -21,7 +20,6 @@ public class TaskViewModel extends AndroidViewModel {
     private static final String TAG = "TaskViewModel";
 
     private final TaskRepository repository;
-    private final PlayerViewModel playerViewModel;
     private final LiveData<List<Task>> allTasks;
     private final ExecutorService executor;
     private final MutableLiveData<String> currentFilter = new MutableLiveData<>("ALL");
@@ -31,9 +29,6 @@ public class TaskViewModel extends AndroidViewModel {
         repository = new TaskRepository(application);
         allTasks = repository.getAllTasks();
         executor = Executors.newSingleThreadExecutor();
-
-        playerViewModel = new ViewModelProvider.AndroidViewModelFactory(application)
-                .create(PlayerViewModel.class);
     }
 
     public LiveData<List<Task>> getAllTasks() {
@@ -68,18 +63,10 @@ public class TaskViewModel extends AndroidViewModel {
             }
 
             task.setCompleted(isCompleted);
+            task.setLastUpdated(System.currentTimeMillis());
             repository.updateTask(task);
 
-            if (isCompleted && !wasCompleted) {
-                Log.d(TAG, "Task completed! Rewarding XP: " + task.getXpReward() + ", Gold: " + task.getGoldReward());
-                playerViewModel.addXp(task.getXpReward());
-                playerViewModel.addGold(task.getGoldReward());
-
-            } else if (!isCompleted && wasCompleted) {
-                Log.d(TAG, "Task uncompleted! Removing XP: " + task.getXpReward() + ", Gold: " + task.getGoldReward());
-                playerViewModel.subtractXp(task.getXpReward());
-                playerViewModel.subtractGold(task.getGoldReward());
-            }
+            Log.d(TAG, "Task completion state updated only: " + task.getTitle());
         });
     }
 

@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
         playerViewModel.initializePlayerIfNeeded();
         tvXpPenalty = findViewById(R.id.tvXpPenalty);
+        applyBarColors();
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         adapter = new TaskAdapter();
@@ -346,6 +347,32 @@ public class MainActivity extends AppCompatActivity {
 
         TextView manaText = findViewById(R.id.manaText);
         if (manaText != null) manaText.setText("💙 Mana: " + player.getCurrentMana() + "/" + player.getMaxMana());
+
+        applyBarColors();
+    }
+
+    private void applyBarColors() {
+        SharedPreferences prefs = getSharedPreferences("app_settings", MODE_PRIVATE);
+
+        int hpColor = prefs.getInt("hp_bar_color", 0xFFFF5252);
+        int manaColor = prefs.getInt("mana_bar_color", 0xFF448AFF);
+        int xpColor = prefs.getInt("xp_bar_color", 0xFFFFD700);
+
+        ProgressBar hpBar = findViewById(R.id.hpProgressBar);
+        ProgressBar manaBar = findViewById(R.id.manaProgressBar);
+        ProgressBar xpBar = findViewById(R.id.xpProgressBar);
+
+        if (hpBar != null) {
+            hpBar.setProgressTintList(android.content.res.ColorStateList.valueOf(hpColor));
+        }
+
+        if (manaBar != null) {
+            manaBar.setProgressTintList(android.content.res.ColorStateList.valueOf(manaColor));
+        }
+
+        if (xpBar != null) {
+            xpBar.setProgressTintList(android.content.res.ColorStateList.valueOf(xpColor));
+        }
     }
 
     private void updatePenaltyIndicator(int penalty) {
@@ -647,6 +674,12 @@ public class MainActivity extends AppCompatActivity {
             return xp * 2;
         }
         return xp;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        applyBarColors();
     }
 
     @Override

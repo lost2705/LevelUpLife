@@ -49,6 +49,12 @@
             android:exported="false"
             android:theme="@style/Theme.LevelUpLife" />
 
+        <activity
+            android:name=".AdminActivity"
+            android:exported="false"
+            android:label="Admin Panel"
+            android:theme="@style/Theme.LevelUpLife" />
+
         <activity android:name=".SettingsActivity" />
         <activity android:name=".OnboardingActivity"/>
         <activity android:name=".HeroActivity"/>
