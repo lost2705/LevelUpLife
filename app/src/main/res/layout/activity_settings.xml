@@ -22,7 +22,7 @@
             android:src="@drawable/ic_back"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:tint="#FFFFFF"
-            android:contentDescription="Back"/>
+            android:contentDescription="Back" />
 
         <TextView
             android:layout_width="0dp"
@@ -32,7 +32,7 @@
             android:text="Settings"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
     </LinearLayout>
 
@@ -55,7 +55,7 @@
                 android:textStyle="bold"
                 android:letterSpacing="0.15"
                 android:layout_marginBottom="8dp"
-                android:layout_marginStart="4dp"/>
+                android:layout_marginStart="4dp" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -77,7 +77,7 @@
                         android:layout_width="32dp"
                         android:layout_height="wrap_content"
                         android:text="🔊"
-                        android:textSize="20sp"/>
+                        android:textSize="20sp" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -91,14 +91,14 @@
                             android:layout_height="wrap_content"
                             android:text="Sound Effects"
                             android:textColor="#FFFFFF"
-                            android:textSize="16sp"/>
+                            android:textSize="16sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Task completion, level up sounds"
                             android:textColor="#888888"
-                            android:textSize="12sp"/>
+                            android:textSize="12sp" />
 
                     </LinearLayout>
 
@@ -106,7 +106,7 @@
                         android:id="@+id/switchSound"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:trackTint="#BB86FC"/>
+                        app:trackTint="#BB86FC" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -120,7 +120,7 @@
                 android:textStyle="bold"
                 android:letterSpacing="0.15"
                 android:layout_marginBottom="8dp"
-                android:layout_marginStart="4dp"/>
+                android:layout_marginStart="4dp" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -142,7 +142,7 @@
                         android:layout_width="32dp"
                         android:layout_height="wrap_content"
                         android:text="🔔"
-                        android:textSize="20sp"/>
+                        android:textSize="20sp" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -156,14 +156,14 @@
                             android:layout_height="wrap_content"
                             android:text="Task Reminders"
                             android:textColor="#FFFFFF"
-                            android:textSize="16sp"/>
+                            android:textSize="16sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Get notified about your tasks"
                             android:textColor="#888888"
-                            android:textSize="12sp"/>
+                            android:textSize="12sp" />
 
                     </LinearLayout>
 
@@ -171,7 +171,77 @@
                         android:id="@+id/switchNotifications"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:trackTint="#BB86FC"/>
+                        app:trackTint="#BB86FC" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BARS"
+                android:textSize="11sp"
+                android:textColor="#BB86FC"
+                android:textStyle="bold"
+                android:letterSpacing="0.15"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="4dp" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#2A2A2A"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:id="@+id/btnBarColors"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:layout_width="32dp"
+                        android:layout_height="wrap_content"
+                        android:text="🎨"
+                        android:textSize="20sp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Customize Bars"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Change HP, Mana and XP colors"
+                            android:textColor="#888888"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textColor="#BB86FC"
+                        android:textSize="24sp" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -185,7 +255,7 @@
                 android:textStyle="bold"
                 android:letterSpacing="0.15"
                 android:layout_marginBottom="8dp"
-                android:layout_marginStart="4dp"/>
+                android:layout_marginStart="4dp" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -195,50 +265,117 @@
                 app:cardElevation="0dp">
 
                 <LinearLayout
-                    android:id="@+id/btnResetProgress"
                     android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:background="?attr/selectableItemBackground">
-
-                    <TextView
-                        android:layout_width="32dp"
-                        android:layout_height="wrap_content"
-                        android:text="🗑️"
-                        android:textSize="20sp"/>
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
+                        android:id="@+id/btnAdminPanel"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <TextView
+                            android:layout_width="32dp"
+                            android:layout_height="wrap_content"
+                            android:text="🛠"
+                            android:textSize="20sp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Admin Panel"
+                                android:textColor="#FFFFFF"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Quick debug access for player stats"
+                                android:textColor="#888888"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Reset Progress"
-                            android:textColor="#FF5252"
-                            android:textSize="16sp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Wipe all data — cannot be undone"
-                            android:textColor="#FF525288"
-                            android:textSize="12sp"/>
+                            android:text="Debug"
+                            android:textColor="#BB86FC"
+                            android:textSize="13sp" />
 
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="›"
-                        android:textColor="#FF5252"
-                        android:textSize="24sp"/>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="#33FFFFFF" />
+
+                    <LinearLayout
+                        android:id="@+id/btnResetProgress"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <TextView
+                            android:layout_width="32dp"
+                            android:layout_height="wrap_content"
+                            android:text="🗑️"
+                            android:textSize="20sp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Reset Progress"
+                                android:textColor="#FF5252"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Wipe all data — cannot be undone"
+                                android:textColor="#FF525288"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="›"
+                            android:textColor="#FF5252"
+                            android:textSize="24sp" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
