@@ -64,15 +64,15 @@ public class PlayerRepository {
         });
     }
 
-    public void addXp(int baseXp) {
+    public void addXp(int xpAmount) {
         executor.execute(() -> {
             Player currentPlayer = playerDao.getPlayerSync();
             if (currentPlayer != null) {
 
                 Log.d(TAG, "💰 XP Reward:");
-                Log.d(TAG, " Final XP received: " + baseXp);
+                Log.d(TAG, " Final XP received: " + xpAmount);
 
-                currentPlayer.setCurrentXp(currentPlayer.getCurrentXp() + baseXp);
+                currentPlayer.setCurrentXp(currentPlayer.getCurrentXp() + xpAmount);
 
                 while (currentPlayer.getCurrentXp() >= currentPlayer.getXpToNextLevel()) {
                     int oldMaxHp = currentPlayer.getMaxHp();
@@ -98,7 +98,6 @@ public class PlayerRepository {
                     levelUpEvent.postValue(event);
                 }
 
-                // Update database
                 playerDao.updatePlayer(currentPlayer);
             }
         });

@@ -10,18 +10,21 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.leveluplife.data.dao.AchievementDao;
 import com.example.leveluplife.data.dao.CompletedTaskDao;
+import com.example.leveluplife.data.dao.DungeonStateDao;
 import com.example.leveluplife.data.dao.PlayerDao;
 import com.example.leveluplife.data.dao.ShopDao;
 import com.example.leveluplife.data.dao.TaskDao;
 import com.example.leveluplife.data.entity.Achievement;
 import com.example.leveluplife.data.entity.CompletedTask;
+import com.example.leveluplife.data.entity.DungeonState;
 import com.example.leveluplife.data.entity.Player;
 import com.example.leveluplife.data.entity.ShopItem;
 import com.example.leveluplife.data.entity.Task;
 
 @Database(
-        entities = {Task.class, Player.class, CompletedTask.class, Achievement.class, ShopItem.class},
-        version = 10,
+        entities = {Task.class, Player.class, CompletedTask.class,
+                Achievement.class, ShopItem.class, DungeonState.class},
+        version = 11,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -31,6 +34,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CompletedTaskDao completedTaskDao();
     public abstract AchievementDao achievementDao();
     public abstract ShopDao shopDao();
+    public abstract DungeonStateDao dungeonStateDao();
 
     private static volatile AppDatabase INSTANCE;
 
@@ -52,7 +56,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     Migrations.MIGRATION_6_7,
                                     Migrations.MIGRATION_7_8,
                                     Migrations.MIGRATION_8_9,
-                                    Migrations.MIGRATION_9_10
+                                    Migrations.MIGRATION_9_10,
+                                    Migrations.MIGRATION_10_11
                             )
                             .addCallback(new RoomDatabase.Callback() {
                                 @Override
@@ -71,6 +76,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public static void seedData(AppDatabase db) {
         seedAchievements(db);
         seedShopItems(db);
+        seedDungeonState(db);
     }
 
     private static void seedAchievements(AppDatabase db) {
@@ -100,5 +106,11 @@ public abstract class AppDatabase extends RoomDatabase {
                 new ShopItem("Mana Potion",    "Restore 30 Mana",              "💙",   80, "MANA_POTION",     30),
                 new ShopItem("Gem Pack",       "Receive 5 Gems",               "💎",  500, "GEM_PACK",        5)
         );
+    }
+
+    private static void seedDungeonState(AppDatabase db) {
+        DungeonState state = new DungeonState();
+        state.setId(1);
+        db.dungeonStateDao().insertOrReplace(state);
     }
 }

@@ -125,6 +125,39 @@ public class Migrations {
         }
     };
 
+    public static final Migration MIGRATION_10_11 = new Migration(10, 11) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS dungeon_state (" +
+                            "id INTEGER NOT NULL PRIMARY KEY, " +
+                            "status TEXT NOT NULL, " +
+                            "startedAt INTEGER NOT NULL, " +
+                            "finishedAt INTEGER NOT NULL, " +
+                            "cooldownUntil INTEGER NOT NULL, " +
+                            "playerCurrentHp INTEGER NOT NULL, " +
+                            "playerCurrentMana INTEGER NOT NULL, " +
+                            "enemyName TEXT NOT NULL, " +
+                            "enemyCurrentHp INTEGER NOT NULL, " +
+                            "enemyMaxHp INTEGER NOT NULL, " +
+                            "turnNumber INTEGER NOT NULL, " +
+                            "rewardXp INTEGER NOT NULL, " +
+                            "rewardGold INTEGER NOT NULL" +
+                            ")"
+            );
+
+            database.execSQL(
+                    "INSERT OR IGNORE INTO dungeon_state (" +
+                            "id, status, startedAt, finishedAt, cooldownUntil, " +
+                            "playerCurrentHp, playerCurrentMana, enemyName, enemyCurrentHp, enemyMaxHp, " +
+                            "turnNumber, rewardXp, rewardGold" +
+                            ") VALUES (" +
+                            "1, 'IDLE', 0, 0, 0, 0, 0, '', 0, 0, 1, 0, 0" +
+                            ")"
+            );
+        }
+    };
+
     public static final Migration MIGRATION_8_9 = new Migration(8, 9) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
