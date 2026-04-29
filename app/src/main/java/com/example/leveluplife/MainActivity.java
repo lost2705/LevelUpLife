@@ -90,6 +90,11 @@ public class MainActivity extends AppCompatActivity {
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         completedTaskViewModel = new ViewModelProvider(this).get(CompletedTaskViewModel.class);
 
+        findViewById(R.id.btnDungeon).setOnClickListener(v -> {
+            startActivity(new Intent(this, DungeonActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+
         playerViewModel.initializePlayerIfNeeded();
         tvXpPenalty = findViewById(R.id.tvXpPenalty);
         applyBarColors();
@@ -134,58 +139,7 @@ public class MainActivity extends AppCompatActivity {
             if (achievement != null) showAchievementUnlockedDialog(achievement);
         });
 
-        adapter.setOnTaskClickListener((task, position) -> {
-            boolean wasCompleted = task.isCompleted();
-            task.setCompleted(!wasCompleted);
-            task.setLastUpdated(System.currentTimeMillis());
-
-            taskViewModel.updateTask(task);
-            adapter.notifyItemChanged(position);
-
-            if (task.isCompleted() && !task.isRewardClaimed()) {
-                CompletedTask completedTask = new CompletedTask(
-                        task.getId(), task.getTitle(),
-                        task.getXpReward(), task.getGoldReward(), task.getFrequency());
-                completedTaskViewModel.insert(completedTask);
-
-                Player player = playerViewModel.getPlayer().getValue();
-                int penalty = (player != null) ? player.getXpPenalty() : 0;
-
-                int baseXp = task.getXpReward();
-                int xpWithClassBonus = applyClassBonus(baseXp, task, player);
-                int xpWithBoost = applyXpBoost(xpWithClassBonus);  // 👈 новая строка
-                int finalXp = xpWithBoost;
-
-                if (penalty > 0) {
-                    finalXp = xpWithBoost * (100 - penalty) / 100;
-                    int reduction = xpWithClassBonus - finalXp;
-                    Snackbar.make(findViewById(android.R.id.content),
-                                    "+" + finalXp + " XP (⚠️ -" + reduction + " penalty), +" +
-                                            task.getGoldReward() + " Gold",
-                                    Snackbar.LENGTH_LONG)
-                            .setBackgroundTint(getResources().getColor(android.R.color.holo_orange_dark))
-                            .show();
-                } else {
-                    Snackbar.make(findViewById(android.R.id.content),
-                            "✅ +" + finalXp + " XP, +" + task.getGoldReward() + " Gold",
-                            Snackbar.LENGTH_SHORT).show();
-                }
-
-                playerViewModel.addXp(finalXp);
-                playerViewModel.addGold(task.getGoldReward());
-                soundManager.playTaskComplete();
-
-                task.setRewardClaimed(true);
-                taskViewModel.updateTask(task);
-
-            } else if (task.isCompleted()) {
-                Snackbar.make(findViewById(android.R.id.content),
-                        "✅ Task completed", Snackbar.LENGTH_SHORT).show();
-            } else {
-                Snackbar.make(findViewById(android.R.id.content),
-                        "Task unchecked", Snackbar.LENGTH_SHORT).show();
-            }
-        });
+        adapter.setOnTaskClickListener(this::handleTaskClick);
 
         adapter.setOnTaskLongClickListener(task -> {
             TaskEditDialog editDialog = TaskEditDialog.newInstance(task);
@@ -215,10 +169,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "🔔 ReminderWorker triggered!", Toast.LENGTH_SHORT).show();
             return true;
         });
-
-        findViewById(R.id.btnSettings).setOnClickListener(v ->
-                startActivity(new Intent(this, SettingsActivity.class))
-        );
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
         bottomNav.setOnItemSelectedListener(item -> {
@@ -265,13 +215,8 @@ public class MainActivity extends AppCompatActivity {
                         taskViewModel.deleteTask(deletedTask);
 
                         Snackbar.make(recyclerView, "Task deleted", Snackbar.LENGTH_LONG)
-                                .setAction("UNDO", v -> {
-                                    taskViewModel.insertTask(deletedTask);
-                                    if (deletedTask.isCompleted()) {
-                                        playerViewModel.addXp(deletedTask.getXpReward());
-                                        playerViewModel.addGold(deletedTask.getGoldReward());
-                                    }
-                                }).show();
+                                .setAction("UNDO", v -> taskViewModel.insertTask(deletedTask))
+                                .show();
                     }
                 }
         );
@@ -674,6 +619,108 @@ public class MainActivity extends AppCompatActivity {
             return xp * 2;
         }
         return xp;
+    }
+
+    private void handleTaskClick(Task task, int position) {
+        boolean wasCompleted = task.isCompleted();
+        task.setCompleted(!wasCompleted);
+        task.setLastUpdated(System.currentTimeMillis());
+
+        taskViewModel.updateTask(task);
+        adapter.notifyItemChanged(position);
+
+        if (task.isCompleted() && !task.isRewardClaimed()) {
+            handleTaskReward(task);
+        } else if (task.isCompleted()) {
+            showSimpleTaskCompletedMessage();
+        } else {
+            showTaskUncheckedMessage();
+        }
+    }
+
+    private void handleTaskReward(Task task) {
+        saveCompletedTask(task);
+
+        Player player = playerViewModel.getPlayer().getValue();
+        RewardResult rewardResult = calculateReward(task, player);
+
+        showRewardSnackbar(rewardResult, task.getGoldReward());
+
+        playerViewModel.addXp(rewardResult.finalXp);
+        playerViewModel.addGold(task.getGoldReward());
+        soundManager.playTaskComplete();
+
+        task.setRewardClaimed(true);
+        taskViewModel.updateTask(task);
+    }
+
+    private void saveCompletedTask(Task task) {
+        CompletedTask completedTask = new CompletedTask(
+                task.getId(),
+                task.getTitle(),
+                task.getXpReward(),
+                task.getGoldReward(),
+                task.getFrequency()
+        );
+        completedTaskViewModel.insert(completedTask);
+    }
+
+    private RewardResult calculateReward(Task task, Player player) {
+        int penalty = (player != null) ? player.getXpPenalty() : 0;
+
+        int baseXp = task.getXpReward();
+        int xpWithClassBonus = applyClassBonus(baseXp, task, player);
+        int xpWithBoost = applyXpBoost(xpWithClassBonus);
+        int finalXp = xpWithBoost;
+
+        if (penalty > 0) {
+            finalXp = xpWithBoost * (100 - penalty) / 100;
+        }
+
+        int reduction = xpWithBoost - finalXp;
+
+        return new RewardResult(finalXp, reduction, penalty > 0);
+    }
+
+    private void showRewardSnackbar(RewardResult rewardResult, int goldReward) {
+        if (rewardResult.hasPenalty) {
+            Snackbar.make(
+                            findViewById(android.R.id.content),
+                            "+" + rewardResult.finalXp + " XP (⚠️ -" + rewardResult.reduction + " penalty), +" +
+                                    goldReward + " Gold",
+                            Snackbar.LENGTH_LONG
+                    )
+                    .setBackgroundTint(getResources().getColor(android.R.color.holo_orange_dark))
+                    .show();
+        } else {
+            Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "✅ +" + rewardResult.finalXp + " XP, +" + goldReward + " Gold",
+                    Snackbar.LENGTH_SHORT
+            ).show();
+        }
+    }
+
+    private void showSimpleTaskCompletedMessage() {
+        Snackbar.make(findViewById(android.R.id.content),
+                "✅ Task completed", Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void showTaskUncheckedMessage() {
+        Snackbar.make(findViewById(android.R.id.content),
+                "Task unchecked", Snackbar.LENGTH_SHORT).show();
+    }
+
+    private static class RewardResult {
+        final int finalXp;
+        final int reduction;
+        final boolean hasPenalty;
+
+        RewardResult(int finalXp, int reduction, boolean hasPenalty) {
+            this.finalXp = finalXp;
+            this.reduction = reduction;
+            this.hasPenalty = hasPenalty;
+        }
     }
 
     @Override

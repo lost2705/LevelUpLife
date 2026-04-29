@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1E1E1E"
+    android:padding="16dp"
+    tools:context=".DungeonActivity">
+
+    <TextView
+        android:id="@+id/tvDungeonStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Status: IDLE"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvCooldown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Cooldown: ready"
+        android:textColor="#BBBBBB"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/tvDungeonStatus"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTurn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Turn: 1"
+        android:textColor="#FFD54F"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/tvCooldown"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/enemyCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        android:background="#2A2A2A"
+        android:padding="14dp"
+        app:layout_constraintTop_toBottomOf="@id/tvCooldown"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvEnemyName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enemy: —"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvEnemyHp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Enemy HP: —"
+            android:textColor="#FF6B6B"
+            android:textSize="15sp" />
+
+        <ProgressBar
+            android:id="@+id/progressEnemyHp"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_marginTop="8dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="#FF5252"
+            android:progressBackgroundTint="#4A2A2A" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/playerCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:background="#2A2A2A"
+        android:padding="14dp"
+        app:layout_constraintTop_toBottomOf="@id/enemyCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvPlayerHp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your HP: 100/100"
+            android:textColor="#FF6B6B"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/progressPlayerHp"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_marginTop="8dp"
+            android:max="100"
+            android:progress="100"
+            android:progressTint="#FF5252"
+            android:progressBackgroundTint="#4A2A2A" />
+
+        <TextView
+            android:id="@+id/tvPlayerMana"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Your Mana: 50/50"
+            android:textColor="#64B5F6"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/progressPlayerMana"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_marginTop="8dp"
+            android:max="50"
+            android:progress="50"
+            android:progressTint="#42A5F5"
+            android:progressBackgroundTint="#1E3A5F" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvReward"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Reward: —"
+        android:textColor="#81C784"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/playerCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvBattleLog"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="#252525"
+        android:padding="12dp"
+        android:text="Battle log will appear here..."
+        android:textColor="#E0E0E0"
+        android:textSize="14sp"
+        android:lineSpacingExtra="4dp"
+        android:gravity="top|start"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="false"
+        android:overScrollMode="ifContentScrolls"
+        app:layout_constraintTop_toBottomOf="@id/tvReward"
+        app:layout_constraintBottom_toTopOf="@id/btnStartRun"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btnStartRun"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Start Dungeon Run"
+        android:textStyle="bold"
+        android:backgroundTint="#7E57C2"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toTopOf="@id/actionRow1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/actionRow1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        app:layout_constraintBottom_toTopOf="@id/actionRow2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btnAttack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="Attack"
+            android:textStyle="bold"
+            android:backgroundTint="#EF5350"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/btnSkill"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="Skill"
+            android:textStyle="bold"
+            android:backgroundTint="#42A5F5"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/actionRow2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btnRest"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="Rest"
+            android:textStyle="bold"
+            android:backgroundTint="#66BB6A"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/btnLeave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="Leave"
+            android:textStyle="bold"
+            android:backgroundTint="#8D6E63"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutBattleResult"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#CC111111"
+        android:visibility="gone"
+        android:alpha="0"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp"
+            android:background="#2A2A2A">
+
+            <TextView
+                android:id="@+id/tvBattleResultTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Victory!"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvBattleResultSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="You cleared the dungeon."
+                android:textColor="#CFCFCF"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btnCloseResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Back"
+                android:textStyle="bold"
+                android:backgroundTint="#7E57C2"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

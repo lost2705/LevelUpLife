@@ -55,10 +55,15 @@
             android:label="Admin Panel"
             android:theme="@style/Theme.LevelUpLife" />
 
+        <activity
+            android:name=".DungeonActivity"
+            android:exported="false"
+            android:label="Dungeon"
+            android:theme="@style/Theme.LevelUpLife" />
+
         <activity android:name=".SettingsActivity" />
         <activity android:name=".OnboardingActivity"/>
         <activity android:name=".HeroActivity"/>
-
 
     </application>
 
