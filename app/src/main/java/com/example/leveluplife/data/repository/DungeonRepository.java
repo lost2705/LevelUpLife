@@ -221,23 +221,23 @@ public class DungeonRepository {
 
     public void resetDungeonCooldown() {
         executor.execute(() -> {
-            DungeonState state = dungeonStateDao.getDungeonStateSync();
-            if (state != null) {
-                state.setCooldownUntil(0L);
-                if (!"IN_PROGRESS".equals(state.getStatus())) {
-                    state.setStatus("IDLE");
-                    state.setFinishedAt(0L);
-                    state.setStartedAt(0L);
-                    state.setEnemyName("");
-                    state.setEnemyCurrentHp(0);
-                    state.setEnemyMaxHp(0);
-                    state.setRewardXp(0);
-                    state.setRewardGold(0);
-                    state.setTurnNumber(1);
-                }
-                dungeonStateDao.update(state);
-                appendLog("Admin: Dungeon cooldown cleared.");
+            DungeonState state = getOrCreateState();
+
+            state.setCooldownUntil(0L);
+            if (!"IN_PROGRESS".equals(state.getStatus())) {
+                state.setStatus("IDLE");
+                state.setFinishedAt(0L);
+                state.setStartedAt(0L);
+                state.setEnemyName("");
+                state.setEnemyCurrentHp(0);
+                state.setEnemyMaxHp(0);
+                state.setRewardXp(0);
+                state.setRewardGold(0);
+                state.setTurnNumber(1);
             }
+
+            dungeonStateDao.insertOrReplace(state);
+            appendLog("Admin: Dungeon cooldown cleared.");
         });
     }
 
