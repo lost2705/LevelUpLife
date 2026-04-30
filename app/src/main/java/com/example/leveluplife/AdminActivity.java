@@ -12,12 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.leveluplife.data.entity.Player;
+import com.example.leveluplife.viewModel.DungeonViewModel;
 import com.example.leveluplife.viewModel.PlayerViewModel;
 
 public class AdminActivity extends AppCompatActivity {
 
     private PlayerViewModel playerViewModel;
     private Player currentPlayer;
+    private DungeonViewModel dungeonViewModel;
 
     private EditText etHeroName, etHeroClass;
     private EditText etLevel, etCurrentXp, etXpToNextLevel, etTalentPoints;
@@ -31,6 +33,7 @@ public class AdminActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin);
 
         playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+        dungeonViewModel = new ViewModelProvider(this).get(DungeonViewModel.class);
 
         bindViews();
         setupBackButton();
@@ -78,6 +81,7 @@ public class AdminActivity extends AppCompatActivity {
         Button btnMaxStats = findViewById(R.id.btnMaxStats);
         Button btnSetPenalty = findViewById(R.id.btnSetPenalty);
         Button btnClearPenalty = findViewById(R.id.btnClearPenalty);
+        Button btnResetDungeonCooldown = findViewById(R.id.btnResetDungeonCooldown);
 
         btnLevel10.setOnClickListener(v -> {
             etLevel.setText("10");
@@ -104,6 +108,11 @@ public class AdminActivity extends AppCompatActivity {
         btnSetPenalty.setOnClickListener(v -> showPenaltyPicker());
 
         btnClearPenalty.setOnClickListener(v -> etXpPenalty.setText("0"));
+
+        btnResetDungeonCooldown.setOnClickListener(v -> {
+            dungeonViewModel.resetDungeonCooldown();
+            Toast.makeText(this, "Dungeon cooldown reset", Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void showPenaltyPicker() {
