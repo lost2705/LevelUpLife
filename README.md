@@ -197,18 +197,6 @@ It is still an active work in progress, mainly in terms of balancing, polish, an
 
 ---
 
-## ⚠️ Known Issues
-
-### Double XP penalty
-There is a likely verified bug where XP penalty is applied twice: once in `MainActivity` before `addXp(finalXp)`, and again inside repository-level XP handling. [file:139][file:140][file:114]
-
-### Split completion logic
-Task completion logic currently exists in both `MainActivity` and `TaskViewModel.toggleTaskCompleted()`, which can create reward inconsistencies and should be unified into a single source of truth. [file:139][file:140]
-
-These issues matter because the reward path now includes class bonus, XP boost, penalty math, completion history, and reward-claim state. [file:139][file:140]
-
----
-
 ## 🗺️ Roadmap
 
 ### Near term
