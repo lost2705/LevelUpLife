@@ -24,7 +24,7 @@ import com.example.leveluplife.data.entity.Task;
 @Database(
         entities = {Task.class, Player.class, CompletedTask.class,
                 Achievement.class, ShopItem.class, DungeonState.class},
-        version = 11,
+        version = 12,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -57,7 +57,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     Migrations.MIGRATION_7_8,
                                     Migrations.MIGRATION_8_9,
                                     Migrations.MIGRATION_9_10,
-                                    Migrations.MIGRATION_10_11
+                                    Migrations.MIGRATION_10_11,
+                                    Migrations.MIGRATION_11_12
                             )
                             .addCallback(new RoomDatabase.Callback() {
                                 @Override
@@ -94,7 +95,12 @@ public abstract class AppDatabase extends RoomDatabase {
                 new Achievement(11, "Destiny's Call",     "Choose your class and begin your journey",  "⚡",  200, 100),
                 new Achievement(12, "Iron Will",          "Become a Warrior — master of strength",     "⚔️",  300, 150),
                 new Achievement(13, "Ancient Knowledge",  "Become a Mage — seeker of wisdom",          "🧙",  300, 150),
-                new Achievement(14, "Shadow Step",        "Become a Ranger — guardian of consistency", "🏹",  300, 150)
+                new Achievement(14, "Shadow Step",        "Become a Ranger — guardian of consistency", "🏹",  300, 150),
+                new Achievement(15, "Dungeon First Blood", "Win your first dungeon battle",            "🕳️",  150,  75),
+                new Achievement(16, "Dungeon Explorer",    "Win 3 dungeon battles",                    "🗺️",  300, 150),
+                new Achievement(17, "Warrior's Trial",     "Win a dungeon battle as a Warrior",        "🛡️",  250, 125),
+                new Achievement(18, "Mage's Trial",        "Win a dungeon battle as a Mage",           "📜",  250, 125),
+                new Achievement(19, "Ranger's Trial",      "Win a dungeon battle as a Ranger",         "🎯",  250, 125)
         );
     }
 

@@ -113,6 +113,14 @@ public class Migrations {
         }
     };
 
+    public static final Migration MIGRATION_8_9 = new Migration(8, 9) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE player ADD COLUMN heroName TEXT DEFAULT 'Hero'");
+            database.execSQL("ALTER TABLE player ADD COLUMN heroClass TEXT DEFAULT NULL");
+        }
+    };
+
     public static final Migration MIGRATION_9_10 = new Migration(9, 10) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
@@ -158,11 +166,16 @@ public class Migrations {
         }
     };
 
-    public static final Migration MIGRATION_8_9 = new Migration(8, 9) {
+    public static final Migration MIGRATION_11_12 = new Migration(11, 12) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE player ADD COLUMN heroName TEXT DEFAULT 'Hero'");
-            database.execSQL("ALTER TABLE player ADD COLUMN heroClass TEXT DEFAULT NULL");
+            database.execSQL("INSERT OR IGNORE INTO achievements " +
+                    "(id, title, description, icon, rewardXp, rewardGold, unlocked, unlockedAt) VALUES " +
+                    "(15, 'Dungeon First Blood', 'Win your first dungeon battle', '🕳️', 150, 75, 0, 0)," +
+                    "(16, 'Dungeon Explorer',    'Win 3 dungeon battles',         '🗺️', 300, 150, 0, 0)," +
+                    "(17, 'Warrior''s Trial',    'Win a dungeon battle as a Warrior', '🛡️', 250, 125, 0, 0)," +
+                    "(18, 'Mage''s Trial',       'Win a dungeon battle as a Mage',    '📜', 250, 125, 0, 0)," +
+                    "(19, 'Ranger''s Trial',     'Win a dungeon battle as a Ranger',  '🎯', 250, 125, 0, 0)");
         }
     };
 }

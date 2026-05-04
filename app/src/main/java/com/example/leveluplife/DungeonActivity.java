@@ -51,6 +51,12 @@ public class DungeonActivity extends AppCompatActivity {
     private String lastBattleLog = "";
     private boolean battleFinishedShown = false;
 
+    private int lastPlayerHp = -1;
+    private int lastPlayerMana = -1;
+    private int lastEnemyHp = -1;
+
+    private View enemyCard;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +102,8 @@ public class DungeonActivity extends AppCompatActivity {
         tvBattleResultTitle = findViewById(R.id.tvBattleResultTitle);
         tvBattleResultSubtitle = findViewById(R.id.tvBattleResultSubtitle);
         btnCloseResult = findViewById(R.id.btnCloseResult);
+
+        enemyCard = findViewById(R.id.enemyCard);
 
         tvBattleLog.setMovementMethod(new ScrollingMovementMethod());
         tvBattleLog.setVerticalScrollBarEnabled(true);
@@ -165,6 +173,10 @@ public class DungeonActivity extends AppCompatActivity {
             setProgressSafely(progressPlayerHp, 100, 0);
             setProgressSafely(progressPlayerMana, 100, 0);
 
+            lastPlayerHp = -1;
+            lastPlayerMana = -1;
+            lastEnemyHp = -1;
+
             updateButtonsForUnavailableState();
             return;
         }
@@ -191,18 +203,48 @@ public class DungeonActivity extends AppCompatActivity {
             int maxHp = player != null ? player.getMaxHp() : Math.max(state.getPlayerCurrentHp(), 1);
             int maxMana = player != null ? player.getMaxMana() : Math.max(state.getPlayerCurrentMana(), 1);
 
-            tvPlayerHp.setText("Your HP: " + state.getPlayerCurrentHp() + "/" + maxHp);
-            tvPlayerMana.setText("Your Mana: " + state.getPlayerCurrentMana() + "/" + maxMana);
-            tvEnemyName.setText("Enemy: " + safeText(state.getEnemyName(), "—"));
-            tvEnemyHp.setText("Enemy HP: " + state.getEnemyCurrentHp() + "/" + state.getEnemyMaxHp());
+            int currentPlayerHp = Math.max(0, state.getPlayerCurrentHp());
+            int currentPlayerMana = Math.max(0, state.getPlayerCurrentMana());
+            int currentEnemyHp = Math.max(0, state.getEnemyCurrentHp());
 
-            animateProgress(progressPlayerHp, Math.max(1, maxHp), Math.max(0, state.getPlayerCurrentHp()));
-            animateProgress(progressPlayerMana, Math.max(1, maxMana), Math.max(0, state.getPlayerCurrentMana()));
-            animateProgress(progressEnemyHp, Math.max(1, state.getEnemyMaxHp()), Math.max(0, state.getEnemyCurrentHp()));
+            tvPlayerHp.setText("Your HP: " + currentPlayerHp + "/" + maxHp);
+            tvPlayerMana.setText("Your Mana: " + currentPlayerMana + "/" + maxMana);
+            tvEnemyName.setText("Enemy: " + safeText(state.getEnemyName(), "—"));
+            tvEnemyHp.setText("Enemy HP: " + currentEnemyHp + "/" + state.getEnemyMaxHp());
+
+            animateProgress(progressPlayerHp, Math.max(1, maxHp), currentPlayerHp);
+            animateProgress(progressPlayerMana, Math.max(1, maxMana), currentPlayerMana);
+            animateProgress(progressEnemyHp, Math.max(1, state.getEnemyMaxHp()), currentEnemyHp);
+
+            if (lastPlayerHp != -1 && currentPlayerHp != lastPlayerHp) {
+                hitBar(progressPlayerHp, currentPlayerHp < lastPlayerHp);
+            }
+
+            if (lastPlayerMana != -1 && currentPlayerMana != lastPlayerMana) {
+                hitBar(progressPlayerMana, currentPlayerMana < lastPlayerMana);
+            }
+
+            if (lastEnemyHp != -1 && currentEnemyHp != lastEnemyHp) {
+                boolean tookDamage = currentEnemyHp < lastEnemyHp;
+                hitBar(progressEnemyHp, tookDamage);
+
+                if (tookDamage) {
+                    hitEnemy(enemyCard);
+                }
+            }
+
+            lastPlayerHp = currentPlayerHp;
+            lastPlayerMana = currentPlayerMana;
+            lastEnemyHp = currentEnemyHp;
         } else {
+            lastPlayerHp = -1;
+            lastPlayerMana = -1;
+            lastEnemyHp = -1;
+
             if (player != null) {
                 tvPlayerHp.setText("Your HP: " + player.getCurrentHp() + "/" + player.getMaxHp());
                 tvPlayerMana.setText("Your Mana: " + player.getCurrentMana() + "/" + player.getMaxMana());
+
                 animateProgress(progressPlayerHp, Math.max(1, player.getMaxHp()), Math.max(0, player.getCurrentHp()));
                 animateProgress(progressPlayerMana, Math.max(1, player.getMaxMana()), Math.max(0, player.getCurrentMana()));
             } else {
@@ -347,5 +389,45 @@ public class DungeonActivity extends AppCompatActivity {
 
     private String safeText(String value, String fallback) {
         return value == null || value.trim().isEmpty() ? fallback : value;
+    }
+
+    private void hitBar(View barView, boolean isDamage) {
+        float shift = isDamage ? 6f : -4f;
+
+        barView.animate().cancel();
+
+        barView.animate()
+                .translationX(shift)
+                .alpha(0.82f)
+                .setDuration(70)
+                .withEndAction(() -> barView.animate()
+                        .translationX(0f)
+                        .alpha(1f)
+                        .setDuration(110)
+                        .start())
+                .start();
+    }
+
+    private void hitEnemy(View enemyView) {
+        if (enemyView == null) return;
+
+        enemyView.animate().cancel();
+
+        enemyView.animate()
+                .translationX(10f)
+                .setDuration(45)
+                .withEndAction(() -> enemyView.animate()
+                        .translationX(-8f)
+                        .setDuration(45)
+                        .withEndAction(() -> enemyView.animate()
+                                .translationX(4f)
+                                .setDuration(35)
+                                .withEndAction(() -> enemyView.animate()
+                                        .translationX(0f)
+                                        .setDuration(35)
+                                        .start())
+                                .start())
+                        .start())
+                .start();
     }
 }
