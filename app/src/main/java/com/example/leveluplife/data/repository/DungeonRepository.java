@@ -1,13 +1,17 @@
 package com.example.leveluplife.data.repository;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.leveluplife.data.dao.AchievementDao;
 import com.example.leveluplife.data.dao.DungeonStateDao;
 import com.example.leveluplife.data.dao.PlayerDao;
 import com.example.leveluplife.data.database.AppDatabase;
+import com.example.leveluplife.data.entity.Achievement;
 import com.example.leveluplife.data.entity.DungeonState;
 import com.example.leveluplife.data.entity.Player;
 
@@ -26,14 +30,18 @@ public class DungeonRepository {
     private final LiveData<DungeonState> dungeonState;
     private final MutableLiveData<String> battleLog = new MutableLiveData<>("");
     private final Random random = new Random();
+    private final Application application;
+    private final AchievementDao achievementDao;
 
     public DungeonRepository(Application application) {
+        this.application = application;
         AppDatabase db = AppDatabase.getDatabase(application);
         this.dungeonStateDao = db.dungeonStateDao();
         this.playerDao = db.playerDao();
         this.playerRepository = PlayerRepository.getInstance(application);
         this.executor = Executors.newSingleThreadExecutor();
         this.dungeonState = dungeonStateDao.getDungeonState();
+        this.achievementDao = db.achievementDao();
     }
 
     public LiveData<DungeonState> getDungeonState() {
@@ -270,8 +278,13 @@ public class DungeonRepository {
         player.setCurrentMana(state.getPlayerCurrentMana());
         playerDao.updatePlayer(player);
 
-        playerRepository.addXp(state.getRewardXp());
-        playerRepository.addGold(state.getRewardGold());
+        int finalXp = applyDungeonXpBoost(state.getRewardXp());
+        int gold = Math.max(0, state.getRewardGold());
+
+        playerRepository.addXp(finalXp);
+        playerRepository.addGold(gold);
+
+        handleDungeonAchievements(player);
 
         state.setStatus("VICTORY");
         state.setFinishedAt(now);
@@ -282,7 +295,7 @@ public class DungeonRepository {
         state.setTurnNumber(1);
 
         dungeonStateDao.update(state);
-        appendLog(message + " Reward: +" + state.getRewardXp() + " XP, +" + state.getRewardGold() + " Gold.");
+        appendLog(message + " Reward: +" + finalXp + " XP, +" + gold + " Gold.");
     }
 
     private void finishDefeat(DungeonState state, String message) {
@@ -381,6 +394,64 @@ public class DungeonRepository {
         } else {
             battleLog.postValue(current + "\n• " + message);
         }
+    }
+
+    private void grantDungeonRewards(DungeonState state, Player player) {
+        int baseXp = Math.max(0, state.getRewardXp());
+        int finalXp = applyDungeonXpBoost(baseXp);
+        int gold = Math.max(0, state.getRewardGold());
+
+        playerRepository.addXp(finalXp);
+        playerRepository.addGold(gold);
+
+        appendLog("Reward: +" + finalXp + " XP, +" + gold + " Gold.");
+    }
+
+    private int applyDungeonXpBoost(int baseXp) {
+        boolean xpBoostActive = application
+                .getSharedPreferences("shop_effects", Context.MODE_PRIVATE)
+                .getBoolean("xp_boost_active", false);
+
+        if (!xpBoostActive) return baseXp;
+
+        return (int) Math.round(baseXp * 1.5);
+    }
+
+    private void handleDungeonAchievements(Player player) {
+        SharedPreferences prefs = application.getSharedPreferences("dungeon_progress", Context.MODE_PRIVATE);
+        int wins = prefs.getInt("dungeon_wins_count", 0) + 1;
+        prefs.edit().putInt("dungeon_wins_count", wins).apply();
+
+        unlockAchievementIfNeeded(15); // First Dungeon Victory
+
+        if (wins >= 3) {
+            unlockAchievementIfNeeded(16); // 3 Dungeon Victories
+        }
+
+        String heroClass = player.getHeroClass();
+        if ("Warrior".equals(heroClass)) {
+            unlockAchievementIfNeeded(17);
+        } else if ("Mage".equals(heroClass)) {
+            unlockAchievementIfNeeded(18);
+        } else if ("Ranger".equals(heroClass)) {
+            unlockAchievementIfNeeded(19);
+        }
+    }
+
+    private void unlockAchievementIfNeeded(int achievementId) {
+        Achievement achievement = achievementDao.getAchievementById(achievementId);
+        if (achievement == null || achievement.isUnlocked()) return;
+
+        achievement.setUnlocked(true);
+        achievement.setUnlockedAt(System.currentTimeMillis());
+        achievementDao.updateAchievement(achievement);
+
+        playerRepository.addXp(achievement.getRewardXp());
+        playerRepository.addGold(achievement.getRewardGold());
+
+        appendLog("Achievement unlocked: " + achievement.getTitle()
+                + " (+" + achievement.getRewardXp() + " XP, +"
+                + achievement.getRewardGold() + " Gold)");
     }
 
     private void clearLog() {
