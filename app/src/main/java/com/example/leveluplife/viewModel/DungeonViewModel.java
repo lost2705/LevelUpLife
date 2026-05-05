@@ -60,6 +60,18 @@ public class DungeonViewModel extends AndroidViewModel {
         repository.resetDungeonCooldown();
     }
 
+    public void useHpPotionInDungeon() {
+        repository.useHpPotionInDungeon();
+    }
+
+    public void useManaPotionInDungeon() {
+        repository.useManaPotionInDungeon();
+    }
+
+    public void ensureDungeonStateExists() {
+        repository.ensureDungeonStateExists();
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();

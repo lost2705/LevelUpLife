@@ -263,35 +263,68 @@ public class MainActivity extends AppCompatActivity {
 
     private void updatePlayerUI(Player player) {
         TextView playerLevelText = findViewById(R.id.playerLevelText);
-        if (playerLevelText != null) playerLevelText.setText("Level " + player.getLevel());
+        if (playerLevelText != null) {
+            playerLevelText.setText("Level " + player.getLevel());
+        }
 
         ProgressBar xpProgressBar = findViewById(R.id.xpProgressBar);
         if (xpProgressBar != null) {
             int oldProgress = xpProgressBar.getProgress();
             xpProgressBar.setMax((int) player.getXpToNextLevel());
+
             android.animation.ObjectAnimator animator = android.animation.ObjectAnimator.ofInt(
-                    xpProgressBar, "progress", oldProgress, (int) player.getCurrentXp());
+                    xpProgressBar,
+                    "progress",
+                    oldProgress,
+                    (int) player.getCurrentXp()
+            );
             animator.setDuration(800);
             animator.setInterpolator(new android.view.animation.DecelerateInterpolator());
             animator.start();
         }
 
         TextView xpText = findViewById(R.id.xpText);
-        if (xpText != null) xpText.setText(player.getCurrentXp() + "/" + player.getXpToNextLevel());
+        if (xpText != null) {
+            xpText.setText(player.getCurrentXp() + "/" + player.getXpToNextLevel());
+        }
 
         updatePenaltyIndicator(player.getXpPenalty());
 
         TextView goldText = findViewById(R.id.goldText);
-        if (goldText != null) goldText.setText("💰 Gold: " + player.getGold());
+        if (goldText != null) {
+            goldText.setText("💰 Gold: " + player.getGold());
+        }
 
         TextView gemsText = findViewById(R.id.gemsText);
-        if (gemsText != null) gemsText.setText("💎 Gems: " + player.getGems());
+        if (gemsText != null) {
+            gemsText.setText("💎 Gems: " + player.getGems());
+        }
 
         TextView hpText = findViewById(R.id.hpText);
-        if (hpText != null) hpText.setText("❤️ HP: " + player.getCurrentHp() + "/" + player.getMaxHp());
+        if (hpText != null) {
+            hpText.setText("❤️ HP: " + player.getCurrentHp() + "/" + player.getMaxHp());
+        }
 
         TextView manaText = findViewById(R.id.manaText);
-        if (manaText != null) manaText.setText("💙 Mana: " + player.getCurrentMana() + "/" + player.getMaxMana());
+        if (manaText != null) {
+            manaText.setText("💙 Mana: " + player.getCurrentMana() + "/" + player.getMaxMana());
+        }
+
+        ProgressBar hpProgressBar = findViewById(R.id.hpProgressBar);
+        if (hpProgressBar != null) {
+            int maxHp = Math.max(1, player.getMaxHp());
+            int currentHp = Math.min(Math.max(0, player.getCurrentHp()), maxHp);
+            hpProgressBar.setMax(maxHp);
+            hpProgressBar.setProgress(currentHp);
+        }
+
+        ProgressBar manaProgressBar = findViewById(R.id.manaProgressBar);
+        if (manaProgressBar != null) {
+            int maxMana = Math.max(1, player.getMaxMana());
+            int currentMana = Math.min(Math.max(0, player.getCurrentMana()), maxMana);
+            manaProgressBar.setMax(maxMana);
+            manaProgressBar.setProgress(currentMana);
+        }
 
         applyBarColors();
     }

@@ -136,6 +136,15 @@
             android:progress="50"
             android:progressTint="#42A5F5"
             android:progressBackgroundTint="#1E3A5F" />
+
+        <TextView
+            android:id="@+id/tvPotions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Potions: HP 0 | Mana 0"
+            android:textColor="#B0BEC5"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <TextView
@@ -224,17 +233,29 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:orientation="horizontal"
-        android:weightSum="2"
+        android:weightSum="3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btnUsePotion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="Potion"
+            android:textStyle="bold"
+            android:backgroundTint="#26A69A"
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/btnRest"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="6dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             android:text="Rest"
             android:textStyle="bold"
             android:backgroundTint="#66BB6A"
@@ -245,7 +266,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="6dp"
+            android:layout_marginStart="4dp"
             android:text="Leave"
             android:textStyle="bold"
             android:backgroundTint="#8D6E63"

@@ -454,6 +454,70 @@ public class DungeonRepository {
                 + achievement.getRewardGold() + " Gold)");
     }
 
+    public void useHpPotionInDungeon() {
+        executor.execute(() -> {
+            DungeonState state = dungeonStateDao.getDungeonStateSync();
+            Player player = playerDao.getPlayerSync();
+
+            if (!isBattleReady(state, player)) return;
+
+            SharedPreferences prefs = application.getSharedPreferences("dungeon_potions", Context.MODE_PRIVATE);
+            int hpPotions = prefs.getInt("hp_potions", 0);
+
+            if (hpPotions <= 0) {
+                appendLog("No HP potions left.");
+                return;
+            }
+
+            if (state.getPlayerCurrentHp() >= player.getMaxHp()) {
+                appendLog("HP is already full.");
+                return;
+            }
+
+            int heal = 50;
+            int newHp = Math.min(player.getMaxHp(), state.getPlayerCurrentHp() + heal);
+            int actualHeal = newHp - state.getPlayerCurrentHp();
+
+            state.setPlayerCurrentHp(newHp);
+            dungeonStateDao.update(state);
+
+            prefs.edit().putInt("hp_potions", hpPotions - 1).apply();
+            appendLog("You drink an HP potion. HP +" + actualHeal + ".");
+        });
+    }
+
+    public void useManaPotionInDungeon() {
+        executor.execute(() -> {
+            DungeonState state = dungeonStateDao.getDungeonStateSync();
+            Player player = playerDao.getPlayerSync();
+
+            if (!isBattleReady(state, player)) return;
+
+            SharedPreferences prefs = application.getSharedPreferences("dungeon_potions", Context.MODE_PRIVATE);
+            int manaPotions = prefs.getInt("mana_potions", 0);
+
+            if (manaPotions <= 0) {
+                appendLog("No Mana potions left.");
+                return;
+            }
+
+            if (state.getPlayerCurrentMana() >= player.getMaxMana()) {
+                appendLog("Mana is already full.");
+                return;
+            }
+
+            int restore = 30;
+            int newMana = Math.min(player.getMaxMana(), state.getPlayerCurrentMana() + restore);
+            int actualRestore = newMana - state.getPlayerCurrentMana();
+
+            state.setPlayerCurrentMana(newMana);
+            dungeonStateDao.update(state);
+
+            prefs.edit().putInt("mana_potions", manaPotions - 1).apply();
+            appendLog("You drink a Mana potion. Mana +" + actualRestore + ".");
+        });
+    }
+
     private void clearLog() {
         battleLog.postValue("");
     }
