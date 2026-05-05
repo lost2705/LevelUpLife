@@ -75,6 +75,15 @@ public class ShopViewModel extends AndroidViewModel {
                             player.getMaxHp()
                     );
                     player.setCurrentHp(newHp);
+
+                    getApplication()
+                            .getSharedPreferences("dungeon_potions", Context.MODE_PRIVATE)
+                            .edit()
+                            .putInt("hp_potions",
+                                    getApplication()
+                                            .getSharedPreferences("dungeon_potions", Context.MODE_PRIVATE)
+                                            .getInt("hp_potions", 0) + 1)
+                            .apply();
                     break;
                 case "MANA_POTION":
                     int newMana = Math.min(
@@ -82,6 +91,15 @@ public class ShopViewModel extends AndroidViewModel {
                             player.getMaxMana()
                     );
                     player.setCurrentMana(newMana);
+
+                    getApplication()
+                            .getSharedPreferences("dungeon_potions", Context.MODE_PRIVATE)
+                            .edit()
+                            .putInt("mana_potions",
+                                    getApplication()
+                                            .getSharedPreferences("dungeon_potions", Context.MODE_PRIVATE)
+                                            .getInt("mana_potions", 0) + 1)
+                            .apply();
                     break;
                 case "GEM_PACK":
                     player.setGems(player.getGems() + item.getEffectValue());
